@@ -44,7 +44,7 @@ def number_spike(sp, tp=100):
     sp = spike recorded as given by spike_detection function
     tp = time period given
 
-    return a list 
+    return a list
     number spike /period 1, 2, etc
     """
     return [sp[i:i + tp].count(1) for i in range(0, len(sp), tp)]
@@ -55,7 +55,6 @@ if __name__ == "__main__":
 
     data = import_data("data.txt")[1]
     spike = spike_detection(data, 40, 1)
-    # print("nombre de spike reconnu pour step={}: {}".format(1, spike.count(1)))
 
     X = [i/1000 for i in range(len(data))]
 
@@ -71,7 +70,8 @@ if __name__ == "__main__":
     plt.title("Spike position")
 
     plt.subplot(313)
-    plt.bar(range(len(data)//1000), number_spike(spike, 1000), color="g", edgecolor="g")
+    plt.bar(range(len(data)//1000), number_spike(spike, 1000),
+            color="g", edgecolor="g")
     plt.axis([100, 150, 0, 30])
     plt.grid(True)
     plt.title("Number spike by period")
