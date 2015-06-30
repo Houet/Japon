@@ -18,11 +18,11 @@ import os
 
 class Interface(Frame):
     """ Spike Detection Graphic Interface """
-    def __init__(self, window, datafile, **kwargs):
+    def __init__(self, window, **kwargs):
         Frame.__init__(self, window, **kwargs)
         self.pack(fill=BOTH)
         self.window = window
-        self.datafile = datafile
+        self.datafile = []
         self.v = IntVar(self, 40)
         self.tp = IntVar(self, 1000)
         self.ax = IntVar(self, 100)
@@ -118,7 +118,9 @@ class Interface(Frame):
         app = PathFinder(wind)
         wind.mainloop()
         self.datafile = os.path.basename(app.current.get())
-        return self.print_graph()
+        self.print_graph()
+        self.window.update()
+        return
 
     def url_open(self):
         """ open a url """
@@ -129,6 +131,6 @@ if __name__ == "__main__":
     root = Tk()
     root.title("Spike Detection Graphic Interface")
 
-    fenetre = Interface(root, "data.txt")
+    fenetre = Interface(root)
 
     root.mainloop()
