@@ -3,14 +3,17 @@
 
 from tkinter import *
 import tkinter as tk
-from spike import *
+
 import matplotlib
 matplotlib.use('TkAgg')
-
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
+
 from webbrowser import open as wbopen
+from spike import *
+from pathfinder import *
+import os
 
 
 class Interface(Frame):
@@ -18,6 +21,7 @@ class Interface(Frame):
     def __init__(self, window, datafile, **kwargs):
         Frame.__init__(self, window, **kwargs)
         self.pack(fill=BOTH)
+        self.window = window
         self.datafile = datafile
         self.v = IntVar(self, 40)
         self.tp = IntVar(self, 1000)
@@ -43,7 +47,7 @@ class Interface(Frame):
         self.frame1.pack(side=RIGHT, fill=Y)
 
         # création de la deuxième frame (partie gauche de l'interface)
-        self.drawingframe = Frame(self, width=8*96, height=5*96)
+        self.drawingframe = Frame(self, width=8*96+10, height=5*96+10)
         self.drawingframe.pack(side=LEFT)
 
         # sous frames contenues dans frame de droite 
@@ -109,12 +113,16 @@ class Interface(Frame):
         allow to find file in
         your PATH
         """
-        pass
+        wind = Toplevel(self.window)
+        wind.title("Open a file")
+        app = PathFinder(wind)
+        wind.mainloop()
+        self.datafile = os.path.basename(app.current.get())
+        return self.print_graph()
 
     def url_open(self):
         """ open a url """
         return wbopen("https://www.google.co.jp/")
-
 
 
 if __name__ == "__main__":
