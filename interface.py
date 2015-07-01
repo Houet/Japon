@@ -1,10 +1,9 @@
-#! /usr/bin/env python3
-# -*- coding:utf-8 -*-
+#!/usr/bin/env python3.4
+# -*- coding: utf-8 -*-
 
 from tkinter import *
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
-
 
 import matplotlib
 matplotlib.use('TkAgg')
@@ -14,7 +13,6 @@ from matplotlib.figure import Figure
 
 from webbrowser import open as wbopen
 from spike import *
-import os
 
 
 class Interface(Frame):
@@ -23,7 +21,7 @@ class Interface(Frame):
         Frame.__init__(self, window, **kwargs)
         self.pack(fill=BOTH)
         self.window = window
-        self.datafile = []
+        self.datafile = ""
         self.v = IntVar(self, 40)
         self.tp = IntVar(self, 1000)
         self.ax = IntVar(self, 100)
@@ -33,6 +31,7 @@ class Interface(Frame):
 
         self.menu1 = Menu(self.menubar, tearoff=0)
         self.menu1.add_command(label="File", accelerator="Ctrl + O", command=self.search_file)
+        self.menu1.bind("<Return>", self.search_file)
         self.menu1.add_command(label="Stream", accelerator="Ctrl + S")
         self.menubar.add_cascade(label="Open", menu=self.menu1)
 
@@ -45,7 +44,7 @@ class Interface(Frame):
 
         # création de la premiere frame (partie droite de l'interface)
         self.frame1 = Frame(self, padx=10, pady=10)
-        self.frame1.pack(side=RIGHT)
+        self.frame1.pack(side=RIGHT, fill=Y)
 
         # création de la deuxième frame (partie gauche de l'interface)
         self.drawingframe = Frame(self, width=10*100, height=6*100)
@@ -60,19 +59,20 @@ class Interface(Frame):
                         label="Threshold:", length=200)
         self.th.grid(column=1, columnspan=2, row=1, sticky=(N, S, E, W))
 
-        self.timescale = Scale(self.frame1_1, orient=HORIZONTAL, from_=100, to=10000,
-                               resolution=100, tickinterval=1000, label="Time",
+        self.timescale = Scale(self.frame1_1, orient=HORIZONTAL, from_=1000, to=10000,
+                               resolution=1000, label="Time Period:",
                                length=200, variable=self.tp)
         self.timescale.grid(column=1, columnspan=2, row=2, sticky=(N, S, E, W))
 
-        self.begin = Label(self.frame1_1, text="Begin time")
+        self.begin = Label(self.frame1_1, text="Begin time:")
         self.begin.grid(column=1, row=3, sticky=W)
         self.axebegin = Spinbox(self.frame1_1, from_=0, to=460, textvariable=self.ax, width=6)
         self.axebegin.grid(column=2, row=3, sticky=E)
 
-        self.end = Label(self.frame1_1, text="End time")
+        self.end = Label(self.frame1_1, text="End time:")
         self.end.grid(column=1, row=4, sticky=W)
-        self.axeend = Spinbox(self.frame1_1, from_=(int(self.ax.get()) + 50), to=460, width=6)
+        self.axeend = Spinbox(self.frame1_1, from_=(int(self.ax.get()) + 50),
+                              to=500, width=6)
         self.axeend.grid(column=2, row=4, sticky=E)
 
         self.frame1_2 = Frame(self.frame1, width=50, height=50, padx=10, pady=10)
@@ -81,6 +81,16 @@ class Interface(Frame):
         self.refresh = Button(self.frame1_2, text="Refresh", command=self.print_graph)
         self.refresh.pack(anchor="se")
         self.quitter = Button(self.frame1_2, text="Quit", command=self.quit).pack(anchor="se")
+
+        self.frame1_3 = LabelFrame(self.frame1, text="Infos", width=50, height=50)
+        self.frame1_3.pack()
+
+        self.info = Label(self.frame1_3, text="Current Threshold: {} mV\n\nCurrent Time Period: {} ms\n\n\
+            Data Name: {}\n\nData Lenght: {}".format(self.th.get(), self.timescale.get(),
+                                                    self.datafile, self.axeend["to"]),
+            justify="left", width=26)
+        self.info.pack(pady=5)
+
 
         for child in self.frame1_1.winfo_children(): child.grid_configure(padx=5, pady=5)
         for child in self.frame1_2.winfo_children(): child.pack_configure(padx=5, pady=5)
@@ -107,6 +117,11 @@ class Interface(Frame):
         toolbar = NavigationToolbar2TkAgg(canvas, self.drawingframe)
         toolbar.update()
         canvas._tkcanvas.pack(expand=1)
+
+        self.info = Label(self.frame1_3, text="Current Threshold: {} mV\n\nCurrent Time Period: {} ms\n\n\
+            Data Name: {}\n\nData Lenght: {}".format(self.th.get(), self.timescale.get(),
+                                                    self.datafile, self.axeend["to"]),
+            justify="left", width=26)
         return
 
     def search_file(self):
@@ -115,6 +130,7 @@ class Interface(Frame):
         your PATH
         """
         self.datafile = askopenfilename(filetypes=[("text file", ".txt")], parent=self.window, title="Open a file")
+        self.axeend["to"] = len(import_data(self.datafile)[1])/1000
         self.print_graph()
         return
 

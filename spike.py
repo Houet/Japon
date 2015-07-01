@@ -1,8 +1,9 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3.4
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
+from math import ceil
 
 
 def import_data(datafile):
@@ -64,23 +65,25 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
     data = import_data(dt)[1]
     spike = spike_detection(data, th, st)
 
-    X = [i/tp for i in range(len(data))]
+    X = [i/1000 for i in range(len(data))]
 
     f = Figure(figsize=(8, 5), dpi=100)
 
     ax1 = f.add_subplot(211)
     ax1.plot(X, data, "r")
     ax1.set_ylabel("Amplitude ($\mu$V)")
-    ax1.axis([axis[0], axis[1], -200, 200])
+    wind = data[axis[0]*1000:axis[1]*1000]
+    ax1.axis([axis[0], axis[1], min(wind)-5, max(wind)+5])
     ax1.grid(True)
     ax2 = ax1.twinx()
     ax2.plot(X, spike, "b")
     ax2.axis([axis[0], axis[1], 0, 1])
 
     b = f.add_subplot(212)
-    b.bar(range(len(data)//tp), number_spike(spike, tp),
-          color="g", width=1)
-    b.axis([axis[0], axis[1], 0, 30])
+    Y = number_spike(spike, tp)
+    X2 = [i*tp/1000 for i in range(len(Y))]
+    b.bar(X2, Y, color="g", width=tp/1000)
+    b.axis([axis[0], axis[1], 0, max(Y) + 5])
     b.set_xlabel("Time (s)")
     b.grid(True)
     return f
