@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
@@ -58,6 +57,7 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
     th = threshold to work with
     st = step to work with
     tp = time period
+    axis = x axes for drawing
 
     return the figure to draw
     """
@@ -66,7 +66,7 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
 
     X = [i/tp for i in range(len(data))]
 
-    f = Figure(figsize=(8,5), dpi=100)
+    f = Figure(figsize=(8, 5), dpi=100)
 
     ax1 = f.add_subplot(211)
     ax1.plot(X, data, "r")
@@ -79,13 +79,12 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
 
     b = f.add_subplot(212)
     b.bar(range(len(data)//tp), number_spike(spike, tp),
-          color="g", edgecolor="g")
+          color="g", width=1)
     b.axis([axis[0], axis[1], 0, 30])
     b.set_xlabel("Time (s)")
     b.grid(True)
     return f
 
-    
 
 if __name__ == "__main__":
     """ draw curb using matplotlib """
@@ -108,9 +107,8 @@ if __name__ == "__main__":
 
     plt.subplot(313)
     plt.bar(range(len(data)//1000), number_spike(spike, 1000),
-            color="g", edgecolor="g")
+            color="g", width=1)
     plt.axis([100, 150, 0, 30])
     plt.grid(True)
     plt.title("Number spike by period")
     plt.show()
-
