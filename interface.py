@@ -3,6 +3,8 @@
 
 from tkinter import *
 import tkinter as tk
+from tkinter.filedialog import askopenfilename
+
 
 import matplotlib
 matplotlib.use('TkAgg')
@@ -12,7 +14,6 @@ from matplotlib.figure import Figure
 
 from webbrowser import open as wbopen
 from spike import *
-from pathfinder import *
 import os
 
 
@@ -44,10 +45,10 @@ class Interface(Frame):
 
         # création de la premiere frame (partie droite de l'interface)
         self.frame1 = Frame(self, padx=10, pady=10)
-        self.frame1.pack(side=RIGHT, fill=Y)
+        self.frame1.pack(side=RIGHT)
 
         # création de la deuxième frame (partie gauche de l'interface)
-        self.drawingframe = Frame(self, width=8*96+10, height=5*96+10)
+        self.drawingframe = Frame(self, width=10*100, height=6*100)
         self.drawingframe.pack(side=LEFT)
 
         # sous frames contenues dans frame de droite 
@@ -113,13 +114,8 @@ class Interface(Frame):
         allow to find file in
         your PATH
         """
-        wind = Toplevel(self.window)
-        wind.title("Open a file")
-        app = PathFinder(wind)
-        wind.mainloop()
-        self.datafile = os.path.basename(app.current.get())
+        self.datafile = askopenfilename(filetypes=[("text file", ".txt")], parent=self.window, title="Open a file")
         self.print_graph()
-        self.window.update()
         return
 
     def url_open(self):
@@ -130,7 +126,5 @@ class Interface(Frame):
 if __name__ == "__main__":
     root = Tk()
     root.title("Spike Detection Graphic Interface")
-
     fenetre = Interface(root)
-
     root.mainloop()
