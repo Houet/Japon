@@ -85,6 +85,7 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
     b.bar(X2, Y, color="g", width=tp/1000)
     b.axis([axis[0], axis[1], 0, max(Y) + 5])
     b.set_xlabel("Time (s)")
+    b.set_ylabel("Firing rate")
     b.grid(True)
     return f
 
@@ -109,9 +110,11 @@ if __name__ == "__main__":
     plt.title("Spike position")
 
     plt.subplot(313)
-    plt.bar(range(len(data)//1000), number_spike(spike, 1000),
-            color="g", width=1)
-    plt.axis([100, 150, 0, 30])
+    Y = number_spike(spike, 1000)
+    print(Y)
+    X2 = [i for i in range(len(Y))]
+    plt.bar(X2, Y, color="g", width=1)
+    # plt.axis([100, 150, 0, 30])
     plt.grid(True)
     plt.title("Number spike by period")
     plt.show()
