@@ -14,6 +14,7 @@ from matplotlib.figure import Figure
 
 from webbrowser import open as wbopen
 from spike import *
+from configure import *
 
 
 class Interface(Frame):
@@ -42,9 +43,7 @@ class Interface(Frame):
         self.menu1.bind_all("<Control-s>", self.search_stream)
         self.menubar.add_cascade(label="Open", menu=self.menu1)
 
-        self.menu2 = Menu(self.menubar, tearoff=0)
-        self.menubar.add_cascade(label="Configure", menu=self.menu2)
-
+        self.menubar.add_command(label="Configure", command=self.settings)
         self.menubar.add_command(label="Help", command=self.url_open)
         window.config(menu=self.menubar)
 
@@ -64,12 +63,12 @@ class Interface(Frame):
         self.frame1_1.pack()
 
         self.frame1_2 = Frame(self.frame1, width=50, height=50, padx=10, pady=10)
-        self.frame1_2.pack(side=BOTTOM, anchor="se", fill=Y)
+        self.frame1_2.pack(side=BOTTOM, fill=Y)
 
 
         #frame 1 settings part
         self.th = Scale(self.frame1_1, orient=HORIZONTAL, from_=20, to=80,
-                        resolution=10, tickinterval=10, variable=self.v,
+                        resolution=10, tickinterval=5, variable=self.v,
                         label="Threshold:", length=200)
         self.th.grid(column=1, columnspan=2, row=1, sticky=(N, S, E, W))
 
@@ -105,7 +104,6 @@ class Interface(Frame):
         for child in self.frame1_1.winfo_children(): child.grid_configure(padx=5, pady=5)
         for child in self.frame1_2.winfo_children(): child.pack_configure(padx=5, pady=5)
 
-
     def print_graph(self):
         """
         print graph on the interface
@@ -117,15 +115,16 @@ class Interface(Frame):
         for w in self.drawingframe.winfo_children():
             w.destroy()
 
-        axe = (self.ax.get(), self.aex.get())
-        self.fig = draw_curb(self.datafile, self.v.get(), tp=self.tp.get(), axis=axe)
+        if self.datafile != "":
+            axe = (self.ax.get(), self.aex.get())
+            self.fig = draw_curb(self.datafile, self.v.get(), tp=self.tp.get(), axis=axe)
 
-        canvas = FigureCanvasTkAgg(self.fig, master=self.drawingframe)
-        canvas.show()
-        canvas.get_tk_widget().pack()
+            canvas = FigureCanvasTkAgg(self.fig, master=self.drawingframe)
+            canvas.show()
+            canvas.get_tk_widget().pack()
 
-        self.information.set("{} mV\n\n{} ms\n\n{}\n\n{} s".format(self.th.get(),
-            self.timescale.get(), self.datafile.split("/")[-1], self.axeend["to"]))
+            self.information.set("{} mV\n\n{} ms\n\n{}\n\n{} s".format(self.th.get(),
+                self.timescale.get(), self.datafile.split("/")[-1], self.axeend["to"]))
         return
 
     def search_file(self, *args):
@@ -155,6 +154,21 @@ class Interface(Frame):
             showinfo(title="Info", message="Plot save !", parent=self.window)
         except AttributeError:
             showwarning(title="Error", message="No plot to save...", parent=self.window)
+        return
+
+    def settings(self):
+        """ allow to change settings and to configure interface """
+        wind = Toplevel(self.window)
+        wind.geometry('+300+100')
+        wind.title("Settings")
+        conf = Configure(wind, self.th["resolution"], self.timescale["resolution"],
+                        self.ax.get(), self.aex.get())
+        wind.mainloop()
+        if conf.rendu != ():
+            self.th["resolution"] = conf.rendu[0]
+            self.timescale.configure(from_=conf.rendu[1], to=conf.rendu[1]*10, resolution=conf.rendu[1])
+            self.ax.set(conf.rendu[2])
+            self.aex.set(conf.rendu[3])
         return
 
     def url_open(self):

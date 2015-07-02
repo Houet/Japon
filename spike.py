@@ -83,7 +83,7 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
     Y = number_spike(spike, tp)
     X2 = [i*tp/1000 for i in range(len(Y))]
     b.bar(X2, Y, color="g", width=tp/1000)
-    b.axis([axis[0], axis[1], 0, max(Y) + 5])
+    b.axis([axis[0], axis[1], 0, max(Y) + 2])
     b.set_xlabel("Time (s)")
     b.set_ylabel("Firing rate")
     b.grid(True)
