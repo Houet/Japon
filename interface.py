@@ -8,7 +8,6 @@ from tkinter.messagebox import showinfo, showwarning
 
 import matplotlib
 matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 
