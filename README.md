@@ -8,15 +8,15 @@ Associate to the spike detection, it drawn the firing rate per period.
 
 ## How to use it ? 
 
-Not surpringly for a GUI, SDGI is simple to use. 
+Not surprisingly for a GUI, SDGI is simple to use. 
 Just find the interface.exe in SDGI directory and launch it.
 
 For linux lovers, just run this in your terminal:
 
-"""
+'''bash
 git clone https://github.com:Houet/japon.git
 python3 interface.py
-"""
+'''
 
 ####Note:
 
