@@ -61,7 +61,7 @@ class Interface(Frame):
         self.drawingframe.pack(side=LEFT)
 
         # Right frame children
-        self.frame1_3 = LabelFrame(self.frame1, text="Infos", width=27)
+        self.frame1_3 = LabelFrame(self.frame1, text="Infos", width=29)
         self.frame1_3.pack()
 
         self.frame1_1 = LabelFrame(self.frame1, text="Settings")
@@ -136,7 +136,7 @@ Data name:\n\nData length:",
         self.info = Label(self.frame1_3,
                           textvariable=self.information,
                           justify="right",
-                          width=8)
+                          width=11)
         self.info.pack()
 
         # padding
@@ -167,10 +167,13 @@ Data name:\n\nData length:",
             canvas.show()
             canvas.get_tk_widget().pack()
 
+            name_data = self.datafile.split("/")[-1]
+            if len(name_data) >= 10:
+                name_data = "... {}".format(name_data[-8:])
             text = "{} mV\n\n{} \
 ms\n\n{}\n\n{} s".format(self.th.get(),
                          self.timescale.get(),
-                         self.datafile.split("/")[-1],
+                         name_data,
                          self.axeend["to"])
             self.information.set(text)
         return
@@ -222,6 +225,7 @@ ms\n\n{}\n\n{} s".format(self.th.get(),
         wind = Toplevel(self.window)
         wind.geometry('+300+100')
         wind.title("Settings")
+        wind.focus()
         conf = Configure(wind,
                          self.th["resolution"],
                          self.timescale["resolution"],

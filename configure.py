@@ -48,7 +48,7 @@ class Configure(Frame):
         Button(self, text="Apply", width=15,
                command=self.apply).grid(column=1, row=5, sticky=W)
         Button(self, text="Quit", width=15,
-               command=self.window.destroy).grid(column=3, row=5, sticky=E)
+               command=self.qu).grid(column=3, row=5, sticky=E)
 
         for child in self.winfo_children():
             child.grid_configure(padx=5, pady=5)
@@ -57,6 +57,12 @@ class Configure(Frame):
         """ button apply fonction """
         self.rendu = (self.wth.get(), self.wtp.get(),
                       self.wbt.get(), self.wet.get())
+        self.quit()
+        self.window.destroy()
+        return
+
+    def qu(self):
+        """ exit window """
         self.quit()
         self.window.destroy()
         return
