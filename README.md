@@ -9,8 +9,7 @@ Associate to the spike detection, it plot the firing rate per period.
 ##How to use it ? 
 
 #####On Window:
-Not surprisingly for a GUI, SDGI is simple to use. 
-Just find the interface.exe in SDGI directory and launch it.
+Find the interface.exe in SDGI directory and launch it.
 
 
 #####On Linux:
@@ -40,8 +39,10 @@ For linux users, following packages are required:
 Button | Command
 -------|---------
 Open | Open a file ~~or a stream~~
-Configure | Change settings 
+Configure | Change settings, open configure window
 Help | Show this page
+
+Open a stream is not available yet.
 
 ####Button:
 
@@ -51,6 +52,7 @@ Refresh | Apply change and display data plot
 Save | Save plot, format: dataname_th={}_tp={}.png
 Quit | Close the application
 
+
 ####Configure window:
 
 Name | Command
@@ -59,6 +61,7 @@ Threshold resolution | Change the step between two value
 Time period resolution | Change the step between two value
 Time begin | Change axis time
 Time end | Change axis time
+
 
 ####Main window:
 
