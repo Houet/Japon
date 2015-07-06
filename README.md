@@ -37,7 +37,7 @@ For linux users, following packages are required:
 Button | Command
 -------|---------
 Open | Open a file ~~or a stream~~
-Configure | change settings 
+Configure | Change settings 
 Help | Show this page
 
 ####Button
@@ -51,20 +51,21 @@ Quit | Close the application
 ####Configure window
 
 Name | Command
-Threshold resolution | change the step between two value
-Time period resolution | change the step between two value
-Time begin | change axis tim
-Time end | change axis time
+-----|---------
+Threshold resolution | Change the step between two value
+Time period resolution | Change the step between two value
+Time begin | Change axis tim
+Time end | Change axis time
 
 ####Main window 
 
 Name | Command
 -----|--------
 Infos | Show info on current plotting
-Settings Threshold | change Threshold value
-Setting Time period | change Time period value
-Begin time | change axis time
-End time | change axis time
+Settings Threshold | Change Threshold value
+Setting Time period | Change Time period value
+Begin time | Change axis time
+End time | Change axis time
 
 
 
