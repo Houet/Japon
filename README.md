@@ -42,7 +42,7 @@ Open | Open a file ~~or a stream~~
 Configure | Change settings, open configure window
 Help | Show this page
 
-Open a stream is not available yet.
+*Open a stream is not available yet*
 
 ####Button:
 
