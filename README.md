@@ -28,24 +28,20 @@ matplotlib with it dependancies
 ## Working
 
 <p style="text-align:justify";>
-Open data file with shorcut "Ctrl + O" or open it by clicking on open.
-Then click on refresh.
+Open data file with shorcut "Ctrl + O" or open it by clicking on open. Then click on refresh.
 This programm detect spike by sorting sequence which high changement in a short time:
 
 signal[t] - signal[t-1] < -th
 
 where *th* is the threshold.
-Setting Threshold scale allow to adjust your desire.  
-Configure allow you to change Threshold resolution, meaning that you can change the step between to value. 
-Same for time period resolution. 
 
+Setting Threshold scale allow to adjust your desire. Configure allow you to change Threshold resolution,
+meaning that you can change the step between to value. Same for time period resolution. 
 You can adjust window time by setting begin time and end time.
-
 SDGI allow you to save your plot.
-
-<\p>
+</p>
 
 ## More 
 
-For more information, please send an email. 
+For more information, please contact. 
 
