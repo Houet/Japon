@@ -13,10 +13,10 @@ Just find the interface.exe in SDGI directory and launch it.
 
 For linux lovers, just run this in your terminal:
 
-'''bash
+```bash
 git clone https://github.com:Houet/japon.git
 python3 interface.py
-'''
+```
 
 ####Note:
 
