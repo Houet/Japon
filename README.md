@@ -38,11 +38,10 @@ For linux users, following packages are required:
 
 Button | Command
 -------|---------
-Open | Open a file ~~or a stream~~
+Open | Open a file ~~or a stream~~[^1]
 Configure | Change settings, open configure window
 Help | Show this page
 
-Open a stream is not available yet.
 
 ####Button:
 
@@ -78,4 +77,6 @@ End time | Change axis time
 ##More 
 
 For more information, please contact. 
+
+[^1]: Open a stream is not available yet.
 
