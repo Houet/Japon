@@ -20,9 +20,14 @@ python3 interface.py
 
 ####Note:
 
-For linux users, following packages are required: 
-1. Python 3 or more
-2. matplotlib with it dependancies
+For linux users, following packages are required:
+
+* Python 3 or more
+* [matplotlib](http://matplotlib.org/) with it dependancies:
+  * numpy
+  * pytz
+  * six
+  * ...
 
 
 ## Working
