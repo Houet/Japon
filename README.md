@@ -1,12 +1,12 @@
 #SDGI
 
-## What is SDGI ?
+##What is SDGI ?
 
 SDGI (Spike Detection Graphical Interface) is a GUI for data analysis
 which find out action potential spike in data from local fiels potential.
 Associate to the spike detection, it drawn the firing rate per period.
 
-## How to use it ? 
+##How to use it ? 
 
 Not surprisingly for a GUI, SDGI is simple to use. 
 Just find the interface.exe in SDGI directory and launch it.
@@ -22,7 +22,7 @@ python3 interface.py
 
 For linux users, following packages are required:
 
-* Python 3 or more
+* [Python3](http://python.org) or more
 * [matplotlib](http://matplotlib.org/) with it dependancies:
   * numpy
   * pytz
@@ -30,22 +30,57 @@ For linux users, following packages are required:
   * ...
 
 
-## Working
+##Working
+
+####Menu:
+
+Button | Command
+-------|---------
+Open | Open a file or a ~~stream~~
+-------|---------
+Configure | change settings 
+-------|---------
+Help | Show this page
+
+####Button
+
+Button | Command
+-------|---------
+Refresh | Apply change and display data plot
+-------|---------
+Save | Save plot, format: dataname_th={}_tp={}.png
+-------|---------
+Quit | Close the application
+
+####Configure window
+
+Name | Command
+-----|---------
+Threshold resolution | change the step between two values
+-----|---------
+Time period resolution | change the step between two values
+-----|---------
+Time begin | change axis time
+-----|---------
+Time end | change axis time
+
+####Main window 
+
+Name | Command
+-----|--------
+Infos | Show info on current plotting
+-----|--------
+Settings Threshold | change Threshold value
+-----|--------
+Setting Time period | change Time period value
+-----|--------
+Begin time | change axis time
+-----|--------
+End time | change axis time
 
 
-Open data file with shorcut "Ctrl + O" or open it by clicking on open. Then click on refresh.
-This programm detect spike by sorting sequence which high changement in a short time:
 
-signal[t] - signal[t-1] < -th
-
-where *th* is the threshold.
-
-Setting Threshold scale allow to adjust your desire. Configure allow you to change Threshold resolution,
-meaning that you can change the step between to value. Same for time period resolution. 
-You can adjust window time by setting begin time and end time.
-SDGI allow you to save your plot.
-
-## More 
+##More 
 
 For more information, please contact. 
 
