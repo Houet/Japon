@@ -2,11 +2,9 @@
 
 ## What is SDGI ?
 
-<p style="text-align:justify";>
 SDGI (Spike Detection Graphical Interface) is a GUI for data analysis
 which find out action potential spike in data from local fiels potential.
 Associate to the spike detection, it drawn the firing rate per period.
-</p>
 
 ## How to use it ? 
 
@@ -23,13 +21,13 @@ python3 interface.py
 ####Note:
 
 For linux users, following packages are required: 
-Python 3 or more
-matplotlib with it dependancies
+1. Python 3 or more
+2. matplotlib with it dependancies
 
 
 ## Working
 
-<p style="text-align:justify";>
+
 Open data file with shorcut "Ctrl + O" or open it by clicking on open. Then click on refresh.
 This programm detect spike by sorting sequence which high changement in a short time:
 
@@ -41,7 +39,6 @@ Setting Threshold scale allow to adjust your desire. Configure allow you to chan
 meaning that you can change the step between to value. Same for time period resolution. 
 You can adjust window time by setting begin time and end time.
 SDGI allow you to save your plot.
-</p>
 
 ## More 
 
