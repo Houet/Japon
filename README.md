@@ -27,6 +27,7 @@ matplotlib with it dependancies
 
 ## Working
 
+<p style="text-align:justify";>
 Open data file with shorcut "Ctrl + O" or open it by clicking on open.
 Then click on refresh.
 This programm detect spike by sorting sequence which high changement in a short time:
@@ -41,6 +42,8 @@ Same for time period resolution.
 You can adjust window time by setting begin time and end time.
 
 SDGI allow you to save your plot.
+
+<\p>
 
 ## More 
 
