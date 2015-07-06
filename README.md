@@ -3,8 +3,8 @@
 ##What is SDGI ?
 
 SDGI (Spike Detection Graphical Interface) is a GUI for data analysis
-which find out action potential spike in data from local fiels potential.
-Associate to the spike detection, it drawn the firing rate per period.
+which find out Action Potential spike in data from Local Field Potential.
+Associate to the spike detection, it plot the firing rate per period.
 
 ##How to use it ? 
 
@@ -13,7 +13,7 @@ Not surprisingly for a GUI, SDGI is simple to use.
 Just find the interface.exe in SDGI directory and launch it.
 
 
-#####On linux:
+#####On Linux:
 For linux lovers, just run this in your terminal:
 
 ```bash
@@ -64,7 +64,7 @@ Time end | Change axis time
 
 Name | Command
 -----|--------
-Infos | Show info on current plotting
+Infos | Show current plotting info
 Settings Threshold | Change Threshold value
 Setting Time period | Change Time period value
 Begin time | Change axis time
