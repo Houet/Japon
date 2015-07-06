@@ -36,32 +36,24 @@ For linux users, following packages are required:
 
 Button | Command
 -------|---------
-Open | Open a file or a ~~stream~~
--------|---------
+Open | Open a file ~~or a stream~~
 Configure | change settings 
--------|---------
 Help | Show this page
 
 ####Button
 
 Button | Command
--------|---------
+-------|--------
 Refresh | Apply change and display data plot
--------|---------
 Save | Save plot, format: dataname_th={}_tp={}.png
--------|---------
 Quit | Close the application
 
 ####Configure window
 
 Name | Command
------|---------
-Threshold resolution | change the step between two values
------|---------
-Time period resolution | change the step between two values
------|---------
-Time begin | change axis time
------|---------
+Threshold resolution | change the step between two value
+Time period resolution | change the step between two value
+Time begin | change axis tim
 Time end | change axis time
 
 ####Main window 
@@ -69,13 +61,9 @@ Time end | change axis time
 Name | Command
 -----|--------
 Infos | Show info on current plotting
------|--------
 Settings Threshold | change Threshold value
------|--------
 Setting Time period | change Time period value
------|--------
 Begin time | change axis time
------|--------
 End time | change axis time
 
 
