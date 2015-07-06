@@ -2,9 +2,11 @@
 
 ## What is SDGI ?
 
+<p style="text-align:justify";>
 SDGI (Spike Detection Graphical Interface) is a GUI for data analysis
 which find out action potential spike in data from local fiels potential.
 Associate to the spike detection, it drawn the firing rate per period.
+</p>
 
 ## How to use it ? 
 
