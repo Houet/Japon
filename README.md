@@ -8,9 +8,12 @@ Associate to the spike detection, it drawn the firing rate per period.
 
 ##How to use it ? 
 
+#####On Window:
 Not surprisingly for a GUI, SDGI is simple to use. 
 Just find the interface.exe in SDGI directory and launch it.
 
+
+#####On linux:
 For linux lovers, just run this in your terminal:
 
 ```bash
@@ -18,7 +21,7 @@ git clone https://github.com:Houet/japon.git
 python3 interface.py
 ```
 
-####Note:
+######Note:
 
 For linux users, following packages are required:
 
@@ -40,7 +43,7 @@ Open | Open a file ~~or a stream~~
 Configure | Change settings 
 Help | Show this page
 
-####Button
+####Button:
 
 Button | Command
 -------|--------
@@ -48,16 +51,16 @@ Refresh | Apply change and display data plot
 Save | Save plot, format: dataname_th={}_tp={}.png
 Quit | Close the application
 
-####Configure window
+####Configure window:
 
 Name | Command
 -----|---------
 Threshold resolution | Change the step between two value
 Time period resolution | Change the step between two value
-Time begin | Change axis tim
+Time begin | Change axis time
 Time end | Change axis time
 
-####Main window 
+####Main window:
 
 Name | Command
 -----|--------
