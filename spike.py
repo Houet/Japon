@@ -110,7 +110,7 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
     c.set_xlabel("Number spike/period ({}ms)".format(tp))
     c.set_ylabel("Number of occurence")
     c.axis([0.5, max(frq) + 0.5, 0, max(mag) + 2])
-    return f
+    return f, spike.count(1)
 
 
 if __name__ == "__main__":

@@ -31,10 +31,10 @@ class Interface(Frame):
         self.fig = None
         self.v = IntVar(self, 40)
         self.tp = IntVar(self, 1000)
-        self.ax = DoubleVar(self, 100)
+        self.ax = DoubleVar(self, 0)
         self.aex = DoubleVar(self, 150)
         self.st = IntVar(self, 1)
-        infotext = "None\n\nNone\n\nNone\n\nNone\n\nNone"
+        infotext = "None\n\nNone\n\nNone\n\nNone\n\nNone\n\nNone"
         self.information = StringVar(self, infotext)
 
         # menu bar creation
@@ -135,7 +135,7 @@ class Interface(Frame):
         # frame 3 infos part
         Label(self.frame1_3,
               text="Current Threshold:\n\nCurrent Period time:\n\n\
-Data name:\n\nData length:\n\nCurrent step:",
+Data name:\n\nData length:\n\nCurrent step:\n\nSpike(s) detected:",
               justify="left",
               width=18).pack(side=LEFT)
         self.info = Label(self.frame1_3,
@@ -164,7 +164,7 @@ Data name:\n\nData length:\n\nCurrent step:",
         axe = (self.ax.get(), self.aex.get())
         if axe[0] != axe[1]:
             try:
-                self.fig = draw_curb(self.data_extrated[1],
+                self.fig, spike_det= draw_curb(self.data_extrated[1],
                                      self.v.get(),
                                      tp=self.tp.get(),
                                      axis=axe,
@@ -178,11 +178,12 @@ Data name:\n\nData length:\n\nCurrent step:",
                 if len(name_data) >= 10:
                     name_data = "... {}".format(name_data[-8:])
                 text = "{} mV\n\n{} \
-ms\n\n{}\n\n{} s\n\n{} ms".format(self.th.get(),
+ms\n\n{}\n\n{} s\n\n{} ms\n\n{}".format(self.th.get(),
                                   self.timescale.get(),
                                   name_data,
                                   self.axeend["to"],
-                                  self.st.get())
+                                  self.st.get(),
+                                  spike_det)
                 self.information.set(text)
             except ValueError:
                 showwarning(title="Warning !",
@@ -205,8 +206,9 @@ ms\n\n{}\n\n{} s\n\n{} ms".format(self.th.get(),
         if self.datafile != "":
             try:
                 self.data_extrated = import_data(self.datafile)
-                self.axeend["to"] = len(self.data_extrated[1])/1000
-                self.axebegin["to"] = len(self.data_extrated[1])/1000
+                self.aex.set(len(self.data_extrated[1])/1000)
+                self.axeend["to"] = self.aex.get()
+                self.axebegin["to"] = self.aex.get()
                 self.print_graph()
             except ValueError:
                 showwarning(title="Warning !",
@@ -224,10 +226,11 @@ ms\n\n{}\n\n{} s\n\n{} ms".format(self.th.get(),
     def save_fig(self):
         """ save the current plotting figure """
         try:
-            self.fig.savefig("{}_th={}_tp={}.png"
+            self.fig.savefig("{}_th={}_tp={}_st={}.png"
                              .format(self.datafile.split(".")[0],
                                      self.th.get(),
-                                     self.timescale.get()))
+                                     self.timescale.get(),
+                                     self.st.get()))
             showinfo(title="Info",
                      message="Plot save !",
                      parent=self.window)
