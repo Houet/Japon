@@ -32,6 +32,7 @@ class Interface(Frame):
         self.tp = IntVar(self, 1000)
         self.ax = IntVar(self, 100)
         self.aex = IntVar(self, 150)
+        self.st = IntVar(self, 1)
         self.information = StringVar(self, "None\n\nNone\n\nNone\n\nNone")
 
         # menu bar creation
@@ -57,15 +58,15 @@ class Interface(Frame):
         self.frame1.pack(side=RIGHT, fill=Y)
 
         # Left main frame (for drawing)
-        self.drawingframe = Frame(self, width=8*100+10, height=5*100)
+        self.drawingframe = Frame(self, width=10*100+10, height=6*100)
         self.drawingframe.pack(side=LEFT)
 
         # Right frame children
         self.frame1_3 = LabelFrame(self.frame1, text="Infos", width=29)
         self.frame1_3.pack()
 
-        self.frame1_1 = LabelFrame(self.frame1, text="Settings")
-        self.frame1_1.pack()
+        self.frame1_1 = LabelFrame(self.frame1, text="Settings", width=29)
+        self.frame1_1.pack(fill=X)
 
         self.frame1_2 = Frame(self.frame1,
                               width=50,
@@ -161,7 +162,8 @@ Data name:\n\nData length:",
             self.fig = draw_curb(self.datafile,
                                  self.v.get(),
                                  tp=self.tp.get(),
-                                 axis=axe)
+                                 axis=axe,
+                                 st=self.st.get())
 
             canvas = FigureCanvasTkAgg(self.fig, master=self.drawingframe)
             canvas.show()

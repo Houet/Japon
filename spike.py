@@ -51,6 +51,23 @@ def number_spike(sp, tp=100):
     return [sp[i:i + tp].count(1) for i in range(0, len(sp), tp)]
 
 
+def graphe(dlist):
+    """
+    plot number of occurence of number spike per period
+    dlist = number of spike by period (list)
+
+    return a tuple
+    number of spike/period, number of occurence
+    """
+    frq = []
+    mag = []
+    for i in range(1, max(dlist) + 1):
+        frq.append(i)
+        mag.append(dlist.count(i))
+
+    return frq, mag
+
+
 def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
     """
     draw curb using matplotlib
@@ -67,9 +84,9 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
 
     X = [i/1000 for i in range(len(data))]
 
-    f = Figure(figsize=(8, 5), dpi=100)
+    f = Figure(figsize=(10, 6), dpi=100, tight_layout=True, facecolor="0.85")
 
-    ax1 = f.add_subplot(211)
+    ax1 = f.add_subplot(311)
     ax1.plot(X, data, "r")
     ax1.set_ylabel("Amplitude ($\mu$V)")
     wind = data[axis[0]*1000:axis[1]*1000]
@@ -79,7 +96,7 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
     ax2.plot(X, spike, "b")
     ax2.axis([axis[0], axis[1], 0, 1])
 
-    b = f.add_subplot(212)
+    b = f.add_subplot(312)
     Y = number_spike(spike, tp)
     X2 = [i*tp/1000 for i in range(len(Y))]
     b.bar(X2, Y, color="g", width=tp/1000)
@@ -87,13 +104,21 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
     b.set_xlabel("Time (s)")
     b.set_ylabel("Firing rate")
     b.grid(True)
+
+    frq, mag = graphe(Y)
+    c = f.add_subplot(313)
+    c.bar(frq, mag, align="center", color="yellow")
+    c.set_xlabel("Number spike/period ({}ms)".format(tp))
+    # c.set_xticks(range(max(frq) + 1))
+    c.set_ylabel("Number of occurence")
+    c.axis([0.5, max(frq) + 0.5, 0, max(mag) + 2])
     return f
 
 
 if __name__ == "__main__":
     """ draw curb using matplotlib """
 
-    data = import_data("data.txt")[1]
+    data = import_data("data2.txt")[1]
     spike = spike_detection(data, 40, 1)
 
     X = [i/1000 for i in range(len(data))]
