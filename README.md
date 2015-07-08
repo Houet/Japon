@@ -66,7 +66,7 @@ Time period resolution | Change the step between two value
 Time resolution | Change the step between two value
 Step value | Change the step
 
-*The Step value is used for spike detection, see [here](https://github.com/Houet/Japon#more).*
+*The Step value is used for spike detection, see [here](https://github.com/Houet/Japon#info-about-spike-detection).*
 
 ####Main window:
 
