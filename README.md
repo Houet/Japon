@@ -6,7 +6,8 @@ SDGI (Spike Detection Graphical Interface) is a GUI for data analysis
 which find out Action Potential spike in data from Local Field Potential.
 Associate to the spike detection, it plot the firing rate per period.
 
-*current version: v1.1*
+######Version
+*current version: [v1.2](https://github.com/Houet/Japon#more)*
 
 ##How to use it ? 
 
@@ -62,9 +63,10 @@ Name | Command
 -----|---------
 Threshold resolution | Change the step between two value
 Time period resolution | Change the step between two value
-Time begin | Change axis time
-Time end | Change axis time
+Time resolution | Change the step between two value
+Step value | Change the step
 
+*the step is used for spike detection see [here](https://github.com/Houet/Japon#more) for more*
 
 ####Main window:
 
@@ -80,5 +82,17 @@ End time | Change axis time
 
 ##More 
 
-For more information, please contact. 
+#####Info about version:
+**what change ?**
+* addition: you can change step between two comparison
+* addition: you can also change the time resolution for a higher precision
+* Bug correction: start time = end time now raise a warning
+* We delete time begin resolution and time end resolution since they were not usefull
 
+#####Info about spike detection:
+Spike are detecting with following algoritm:
+*data[t] - data[t + step -1] <  -threshold*
+
+If True, spike is detected, otherwise not.
+
+For more information, please contact. 
