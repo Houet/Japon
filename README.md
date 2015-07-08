@@ -12,8 +12,8 @@ Associate to the spike detection, it plot the firing rate per period.
 ##How to use it ? 
 
 #####On Window:
-Download the project then find the interface.exe 
-in SDGI directory and launch it.
+1. Download the project.
+2. Find interface.exe in SDGI directory and launch it.
 
 
 #####On Linux:
@@ -66,7 +66,7 @@ Time period resolution | Change the step between two value
 Time resolution | Change the step between two value
 Step value | Change the step
 
-*the step is used for spike detection see [here](https://github.com/Houet/Japon#more) for more*
+*The Step value is used for spike detection, see [here](https://github.com/Houet/Japon#more).*
 
 ####Main window:
 
@@ -79,11 +79,9 @@ Begin time | Change axis time
 End time | Change axis time
 
 
-
 ##More 
 
-#####Info about version:
-**what change ?**
+#####Version: what change ?
 * addition: you can change step between two comparison
 * addition: you can also change the time resolution for a higher precision
 * Bug correction: start time = end time now raise a warning
@@ -91,8 +89,10 @@ End time | Change axis time
 
 #####Info about spike detection:
 Spike are detecting with following algoritm:
+
 *data[t] - data[t + step -1] <  -threshold*
 
 If True, spike is detected, otherwise not.
+
 
 For more information, please contact. 
