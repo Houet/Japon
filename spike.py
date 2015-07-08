@@ -84,12 +84,12 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
 
     X = [i/1000 for i in range(len(data))]
 
-    f = Figure(figsize=(10, 6), dpi=100, tight_layout=True, facecolor="0.85")
+    f = Figure(figsize=(10, 6), dpi=100, tight_layout=True, facecolor="0.90")
 
     ax1 = f.add_subplot(311)
     ax1.plot(X, data, "r")
     ax1.set_ylabel("Amplitude ($\mu$V)")
-    wind = data[axis[0]*1000:axis[1]*1000]
+    wind = data[int(axis[0]*1000):int(axis[1]*1000)]
     ax1.axis([axis[0], axis[1], min(wind)-5, max(wind)+5])
     ax1.grid(True)
     ax2 = ax1.twinx()

@@ -30,10 +30,12 @@ class Interface(Frame):
         self.fig = None
         self.v = IntVar(self, 40)
         self.tp = IntVar(self, 1000)
-        self.ax = IntVar(self, 100)
-        self.aex = IntVar(self, 150)
+        self.ax = DoubleVar(self, 100)
+        self.aex = DoubleVar(self, 150)
         self.st = IntVar(self, 1)
-        self.information = StringVar(self, "None\n\nNone\n\nNone\n\nNone")
+        self.tr = DoubleVar(self, 1)
+        infotext = "None\n\nNone\n\nNone\n\nNone\n\nNone"
+        self.information = StringVar(self, infotext)
 
         # menu bar creation
         self.menubar = Menu(self)
@@ -102,6 +104,7 @@ class Interface(Frame):
         self.axebegin = Spinbox(self.frame1_1,
                                 from_=0,
                                 to=500,
+                                increment=1,
                                 textvariable=self.ax,
                                 width=6)
         self.axebegin.grid(column=2, row=3, sticky=E)
@@ -110,6 +113,7 @@ class Interface(Frame):
         self.axeend = Spinbox(self.frame1_1,
                               from_=0,
                               to=500,
+                              increment=1,
                               textvariable=self.aex,
                               width=6)
         self.axeend.grid(column=2, row=4, sticky=E)
@@ -131,7 +135,7 @@ class Interface(Frame):
         # frame 3 infos part
         Label(self.frame1_3,
               text="Current Threshold:\n\nCurrent Period time:\n\n\
-Data name:\n\nData length:",
+Data name:\n\nData length:\n\nCurrent step:",
               justify="left",
               width=18).pack(side=LEFT)
         self.info = Label(self.frame1_3,
@@ -158,26 +162,32 @@ Data name:\n\nData length:",
             w.destroy()
 
         if self.datafile != "":
-            axe = (self.ax.get(), self.aex.get())
-            self.fig = draw_curb(self.datafile,
-                                 self.v.get(),
-                                 tp=self.tp.get(),
-                                 axis=axe,
-                                 st=self.st.get())
+            try:
+                axe = (self.ax.get(), self.aex.get())
+                self.fig = draw_curb(self.datafile,
+                                     self.v.get(),
+                                     tp=self.tp.get(),
+                                     axis=axe,
+                                     st=self.st.get())
 
-            canvas = FigureCanvasTkAgg(self.fig, master=self.drawingframe)
-            canvas.show()
-            canvas.get_tk_widget().pack()
+                canvas = FigureCanvasTkAgg(self.fig, master=self.drawingframe)
+                canvas.show()
+                canvas.get_tk_widget().pack()
 
-            name_data = self.datafile.split("/")[-1]
-            if len(name_data) >= 10:
-                name_data = "... {}".format(name_data[-8:])
-            text = "{} mV\n\n{} \
-ms\n\n{}\n\n{} s".format(self.th.get(),
-                         self.timescale.get(),
-                         name_data,
-                         self.axeend["to"])
-            self.information.set(text)
+                name_data = self.datafile.split("/")[-1]
+                if len(name_data) >= 10:
+                    name_data = "... {}".format(name_data[-8:])
+                text = "{} mV\n\n{} \
+ms\n\n{}\n\n{} s\n\n{} ms".format(self.th.get(),
+                                  self.timescale.get(),
+                                  name_data,
+                                  self.axeend["to"],
+                                  self.st.get())
+                self.information.set(text)
+            except ValueError:
+                showwarning(title="Warning !",
+                            message="Begin time = End time",
+                            parent=self.window)
         return
 
     def search_file(self, *args):
@@ -202,7 +212,7 @@ ms\n\n{}\n\n{} s".format(self.th.get(),
     def search_stream(self, *args):
         """ allow to find stream in your path """
         showinfo(title="Info",
-                 message="Work in progress ...",
+                 message="Not available yet ...",
                  parent=self.window)
         return
 
@@ -231,16 +241,17 @@ ms\n\n{}\n\n{} s".format(self.th.get(),
         conf = Configure(wind,
                          self.th["resolution"],
                          self.timescale["resolution"],
-                         self.ax.get(),
-                         self.aex.get())
+                         self.tr.get(),
+                         self.st.get())
         wind.mainloop()
         if conf.rendu != ():
             self.th["resolution"] = conf.rendu[0]
             self.timescale.configure(from_=conf.rendu[1],
                                      to=conf.rendu[1]*10,
                                      resolution=conf.rendu[1])
-            self.ax.set(conf.rendu[2])
-            self.aex.set(conf.rendu[3])
+            self.axebegin["increment"] = conf.rendu[2]
+            self.axeend["increment"] = conf.rendu[2]
+            self.st.set(conf.rendu[3])
         return
 
     def url_open(self):
