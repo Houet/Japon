@@ -53,7 +53,7 @@ Help | Show this page
 Button | Command
 -------|--------
 Refresh | Apply change and display data plot
-Save | Save plot, format: dataname_th={}_tp={}.png
+Save | Save plot, format: dataname_th={}_tp={}_st={}.png
 Quit | Close the application
 
 
