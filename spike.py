@@ -79,17 +79,16 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
 
     return the figure to draw
     """
-    data = import_data(dt)[1]
-    spike = spike_detection(data, th, st)
+    spike = spike_detection(dt, th, st)
 
-    X = [i/1000 for i in range(len(data))]
+    X = [i/1000 for i in range(len(dt))]
 
     f = Figure(figsize=(10, 6), dpi=100, tight_layout=True, facecolor="0.90")
 
     ax1 = f.add_subplot(311)
-    ax1.plot(X, data, "r")
-    ax1.set_ylabel("Amplitude ($\mu$V)")
-    wind = data[int(axis[0]*1000):int(axis[1]*1000)]
+    ax1.plot(X, dt, "r")
+    ax1.set_ylabel("Amplitude (mV)")
+    wind = dt[int(axis[0]*1000):int(axis[1]*1000)]
     ax1.axis([axis[0], axis[1], min(wind)-5, max(wind)+5])
     ax1.grid(True)
     ax2 = ax1.twinx()
@@ -109,7 +108,6 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
     c = f.add_subplot(313)
     c.bar(frq, mag, align="center", color="yellow")
     c.set_xlabel("Number spike/period ({}ms)".format(tp))
-    # c.set_xticks(range(max(frq) + 1))
     c.set_ylabel("Number of occurence")
     c.axis([0.5, max(frq) + 0.5, 0, max(mag) + 2])
     return f

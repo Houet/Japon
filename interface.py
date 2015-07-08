@@ -27,13 +27,13 @@ class Interface(Frame):
 
         # variable
         self.datafile = ""
+        self.data_extrated = (None, None)
         self.fig = None
         self.v = IntVar(self, 40)
         self.tp = IntVar(self, 1000)
         self.ax = DoubleVar(self, 100)
         self.aex = DoubleVar(self, 150)
         self.st = IntVar(self, 1)
-        self.tr = DoubleVar(self, 1)
         infotext = "None\n\nNone\n\nNone\n\nNone\n\nNone"
         self.information = StringVar(self, infotext)
 
@@ -68,7 +68,7 @@ class Interface(Frame):
         self.frame1_3.pack()
 
         self.frame1_1 = LabelFrame(self.frame1, text="Settings", width=29)
-        self.frame1_1.pack(fill=X)
+        self.frame1_1.pack(fill=X, pady=8)
 
         self.frame1_2 = Frame(self.frame1,
                               width=50,
@@ -104,7 +104,7 @@ class Interface(Frame):
         self.axebegin = Spinbox(self.frame1_1,
                                 from_=0,
                                 to=500,
-                                increment=1,
+                                increment=10,
                                 textvariable=self.ax,
                                 width=6)
         self.axebegin.grid(column=2, row=3, sticky=E)
@@ -113,7 +113,7 @@ class Interface(Frame):
         self.axeend = Spinbox(self.frame1_1,
                               from_=0,
                               to=500,
-                              increment=1,
+                              increment=10,
                               textvariable=self.aex,
                               width=6)
         self.axeend.grid(column=2, row=4, sticky=E)
@@ -161,10 +161,10 @@ Data name:\n\nData length:\n\nCurrent step:",
         for w in self.drawingframe.winfo_children():
             w.destroy()
 
-        if self.datafile != "":
+        axe = (self.ax.get(), self.aex.get())
+        if axe[0] != axe[1]:
             try:
-                axe = (self.ax.get(), self.aex.get())
-                self.fig = draw_curb(self.datafile,
+                self.fig = draw_curb(self.data_extrated[1],
                                      self.v.get(),
                                      tp=self.tp.get(),
                                      axis=axe,
@@ -186,8 +186,12 @@ ms\n\n{}\n\n{} s\n\n{} ms".format(self.th.get(),
                 self.information.set(text)
             except ValueError:
                 showwarning(title="Warning !",
-                            message="Begin time = End time",
+                            message="Wrong file ...",
                             parent=self.window)
+        else:
+            showwarning(title="Warning !",
+                        message="Begin time = End time",
+                        parent=self.window)
         return
 
     def search_file(self, *args):
@@ -200,8 +204,9 @@ ms\n\n{}\n\n{} s\n\n{} ms".format(self.th.get(),
                                         title="Open a file")
         if self.datafile != "":
             try:
-                self.axeend["to"] = len(import_data(self.datafile)[1])/1000
-                self.axebegin["to"] = len(import_data(self.datafile)[1])/1000
+                self.data_extrated = import_data(self.datafile)
+                self.axeend["to"] = len(self.data_extrated[1])/1000
+                self.axebegin["to"] = len(self.data_extrated[1])/1000
                 self.print_graph()
             except ValueError:
                 showwarning(title="Warning !",
@@ -241,7 +246,7 @@ ms\n\n{}\n\n{} s\n\n{} ms".format(self.th.get(),
         conf = Configure(wind,
                          self.th["resolution"],
                          self.timescale["resolution"],
-                         self.tr.get(),
+                         self.axebegin["increment"],
                          self.st.get())
         wind.mainloop()
         if conf.rendu != ():
