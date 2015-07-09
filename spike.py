@@ -87,7 +87,7 @@ def draw_curb(dt, th=40, st=1, tp=1000, axis=(100, 150)):
 
     ax1 = f.add_subplot(311)
     ax1.plot(X, dt, "r")
-    ax1.set_ylabel("Amplitude (mV)")
+    ax1.set_ylabel("Amplitude ($\mu$V)")
     wind = dt[int(axis[0]*1000):int(axis[1]*1000)]
     ax1.axis([axis[0], axis[1], min(wind)-5, max(wind)+5])
     ax1.grid(True)

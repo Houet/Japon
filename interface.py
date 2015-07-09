@@ -100,7 +100,7 @@ class Interface(Frame):
         self.timescale.grid(column=1, columnspan=2, row=2, sticky=(N, S, E, W))
 
         Label(self.frame1_1,
-              text="Begin time:").grid(column=1, row=3, sticky=W)
+              text="Starting time:").grid(column=1, row=3, sticky=W)
         self.axebegin = Spinbox(self.frame1_1,
                                 from_=0,
                                 to=500,
@@ -177,8 +177,9 @@ Data name:\n\nData length:\n\nCurrent step:\n\nSpike(s) detected:",
                 name_data = self.datafile.split("/")[-1]
                 if len(name_data) >= 10:
                     name_data = "... {}".format(name_data[-8:])
-                text = "{} mV\n\n{} \
+                text = "{} {}V\n\n{} \
 ms\n\n{}\n\n{} s\n\n{} ms\n\n{}".format(self.th.get(),
+                                  chr(956),
                                   self.timescale.get(),
                                   name_data,
                                   self.axeend["to"],
