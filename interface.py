@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """ SDGI programm, require spike.py and configure.py """
