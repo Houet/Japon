@@ -20,7 +20,7 @@ def import_data(datafile):
     return header, [float(i[1]) for i in data]
 
 
-def spike_detection(rs, th, step=4):
+def spike_detection(rs, th, step=1):
     """
     record spike position from a signal
     rs = recorded signal
@@ -49,6 +49,21 @@ def number_spike(sp, tp=100):
     number spike /period 1, 2, etc
     """
     return [sp[i:i + tp].count(1) for i in range(0, len(sp), tp)]
+
+
+# def get_spike_nb(sp):
+#     """
+#     donne le nombre de spike en tenant compte que
+#     01110 n'est qu'une seule spike
+
+#     return a list
+#     """
+#     tab = [0 for i in range(len(sp))]
+#     i = 0
+#     while i <= len(sp):
+#         if sp[i] == 1:
+#             while sp[i] == 1:
+#                 tab[i]
 
 
 def graphe(dlist):
