@@ -7,7 +7,7 @@ which find out Action Potential spike in data from Local Field Potential.
 Associate to the spike detection, it plot the firing rate per period.
 
 ######Version
-*current version: [v1.2](https://github.com/Houet/Japon#more)*
+*current version: [v1.2](Houet/Japon/archive/master.zip)*
 
 ##How to use it ? 
 
