@@ -51,21 +51,6 @@ def number_spike(sp, tp=100):
     return [sp[i:i + tp].count(1) for i in range(0, len(sp), tp)]
 
 
-# def get_spike_nb(sp):
-#     """
-#     donne le nombre de spike en tenant compte que
-#     01110 n'est qu'une seule spike
-
-#     return a list
-#     """
-#     tab = [0 for i in range(len(sp))]
-#     i = 0
-#     while i <= len(sp):
-#         if sp[i] == 1:
-#             while sp[i] == 1:
-#                 tab[i]
-
-
 def graphe(dlist):
     """
     plot number of occurence of number spike per period
