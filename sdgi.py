@@ -23,6 +23,194 @@ from webbrowser import open as wbopen
 from sdgi_fonction import *
 
 
+class Filtre(object):
+    """ filtre de detection de spike """
+    def __init__(self, method=None, threshold=40, time_period=1000, step=1):
+        """ methode could be: slope, upper, lower or both """
+        self.methode = method
+        self.threshold = threshold
+        self.time_period = time_period
+        self.step = step
+        self.tab_spikes = []
+        self.number_spikes = self.tab_spikes.count(1)
+        self.moving_average = []
+
+    def get_spike(self, data):
+        """ return a tab with 1 when spike is detected, 0 otherwise """
+        methode = { 
+                    "Slope": self.get_spike_slope,
+                    "Upper": self.get_spike_upper,
+                    "Lower": self.get_spike_lower,
+                    "Both": self.get_spike_both,
+                    }
+        if self.methode != "Slope":
+            self.ma(data)
+        if self.methode != "":
+            self.tab_spikes = methode[self.methode](data)
+            self.tab_spikes = self.filtre()
+        self.number_spikes = self.tab_spikes.count(1)
+        return self.tab_spikes
+
+    def ma(self, data):
+        """
+        return 
+        the moving average of data
+        """
+        debut = sum(data[:20])/20
+        for i in range(10, len(data)-11):
+            debut += (data[i+10 +1] - data[i-10 +1])/20
+            self.moving_average.append(debut)
+        return
+
+    def get_spike_slope(self, data):
+        """ get spike with slope method """
+        toreturn = [0 for i in range(len(data))]
+        for t in range(self.step + 1, len(data)):
+            if data[t] - data[t - self.step] < - self.threshold:
+                toreturn[t - self.step] = 1
+                continue
+        return toreturn
+
+    def get_spike_upper(self, data):
+        """ get spike with upper method """
+        pas = (len(data) - len(self.moving_average)) // 2
+        tab = [0 for i in range(len(self.moving_average))]
+        for i in range(1, len(self.moving_average)):
+            if data[i + pas] > self.moving_average[i] + self.threshold:
+                tab[i] = 1
+        return tab
+
+    def get_spike_lower(self, data):
+        """ get spike with lower method """
+        pas = (len(data) - len(self.moving_average)) // 2
+        tab = [0 for i in range(len(self.moving_average))]
+        for i in range(1, len(self.moving_average)):
+            if data[i + pas] < self.moving_average[i] - self.threshold:
+                tab[i] = 1
+        return tab
+
+    def get_spike_both(self, data):
+        """ get spike with both method """
+        pas = (len(data) - len(self.moving_average)) // 2
+        tab = [0 for i in range(len(self.moving_average))]
+        for i in range(1, len(self.moving_average) - pas):
+            if data[i  + pas] > self.moving_average[i] + self.threshold:
+                for j in range(5):
+                    if data[i + pas + j] < self.moving_average[i + j] - self.threshold:
+                        tab[i]=1
+                        break
+        return tab
+
+    def filtre(self):
+        """
+        transform 01110 signal into 01000 signal
+        detect one 'true' spike instead of three
+        """
+        tab = [0 for i in self.tab_spikes]
+        for i in range(1, len(self.tab_spikes)):
+            if self.tab_spikes[i] != self.tab_spikes[i-1]:
+                if self.tab_spikes[i] == 1:
+                    tab[i] = 1
+        return tab
+
+    def firing_rate(self):
+        """
+        sum the number of spike in a time period
+        sp = spike recorded as given by spike_detection function
+        tp = time period given
+
+        return a list
+        number spike /period 1, 2, etc
+        """
+        return [self.tab_spikes[i:i + self.time_period].count(1) 
+                for i in range(0, len(self.tab_spikes), self.time_period)]
+
+
+class InfoFiltre(LabelFrame):
+    """ small frame with information about filter """
+    def __init__(self, parent, info, nb_spike, **kwargs):
+        LabelFrame.__init__(self, parent, **kwargs)
+
+        Label(self, text="Method:").grid(column=1, row=1, sticky=W)
+        Label(self,
+              textvariable=info["method"],
+              width=5,
+              anchor=E).grid(column=2, row=1, sticky=E)
+        Label(self, text="Threshold:").grid(column=1, row=2, sticky=W)
+        Label(self, textvariable=info["threshold"]).grid(column=2,
+                                                         row=2,
+                                                         sticky=E)
+        Label(self, text="Time period:").grid(column=1, row=3, sticky=W)
+        Label(self, textvariable=info["time_period"]).grid(column=2,
+                                                           row=3,
+                                                           sticky=E)
+        Label(self, text="Step:").grid(column=1, row=4, sticky=W)
+        Label(self, textvariable=info["step"]).grid(column=2, row=4, sticky=E)
+        Label(self, text="Spike(s) detected:").grid(column=1, row=5, sticky=W)
+        Label(self, textvariable=nb_spike).grid(column=2, row=5, sticky=E)
+
+
+class SettingFiltre(LabelFrame):
+    """ small frame where you can set your filter """
+    def __init__(self, parent, filtre,  **kwargs):
+        LabelFrame.__init__(self, parent, **kwargs)
+        self.filtre = filtre
+
+        Label(self, text="Threshold:").grid(column=1, row=1, sticky=W)
+        Entry(self,
+              textvariable=filtre["threshold"],
+              width=5,
+              justify="right").grid(column=2, row=1)
+
+        Label(self, text="Time Period:").grid(column=1, row=2, sticky=W)
+        Entry(self,
+              textvariable=filtre["time_period"],
+              width=5,
+              justify="right").grid(column=2, row=2)
+
+        Label(self, text="Method:").grid(column=1, row=3, sticky=W)
+        self.method = Menubutton(self,
+                                 textvariable=filtre["method"],
+                                 width=6,
+                                 relief=RAISED)
+        self.method.menu = Menu(self.method, tearoff=0)
+        self.method["menu"] = self.method.menu
+        self.method.menu.add_radiobutton(label=None,
+                                         variable=filtre["method"],
+                                         command=self.action)
+        self.method.menu.add_radiobutton(label="Slope",
+                                         variable=filtre["method"],
+                                         command=self.action)
+        self.method.menu.add_radiobutton(label="Upper",
+                                         variable=filtre["method"],
+                                         command=self.action)
+        self.method.menu.add_radiobutton(label="Lower",
+                                         variable=filtre["method"],
+                                         command=self.action)
+        self.method.menu.add_radiobutton(label="Both",
+                                         variable=filtre["method"],
+                                         command=self.action)
+        self.method.grid(column=2, row=3, padx=5, pady=5)
+
+        Label(self, text="Step:").grid(column=1, row=4, sticky=W)
+        self.step_entry = Entry(self,
+                                textvariable=filtre["step"],
+                                width=5,
+                                justify="right")
+        self.step_entry.grid(column=2, row=4)
+        self.action()
+
+        for child in self.winfo_children():
+            child.grid_configure(padx=5)
+
+    def action(self):
+        """ change the apparence of step entry widget """
+        if self.filtre["method"].get() == "Slope":
+            self.step_entry.configure(state="normal")
+        else:
+            self.step_entry.configure(state="disabled")
+
+
 class Sdgi(Frame):
     """ Spike Detection Graphic Interface """
     def __init__(self, window, **kwargs):
@@ -38,7 +226,6 @@ class Sdgi(Frame):
                     "start": DoubleVar(self, 0),
                     "end": DoubleVar(self, 0),
                     }
-
         self.options = {
                         "f1": BooleanVar(self, False),
                         "f2": BooleanVar(self, False),
@@ -48,108 +235,107 @@ class Sdgi(Frame):
                         "mov_up_2": BooleanVar(self, False),
                         "mov_down_2": BooleanVar(self, False),
                         }
-
         self.firing_rate = BooleanVar(self, False)
-    
         self.filter1 = {
+                        "method": StringVar(self, "Slope"),
                         "threshold": IntVar(self, 40),
                         "time_period": IntVar(self, 1000),
-                        "method": StringVar(self, None),
-                        "step": IntVar(self, None),
+                        "step": IntVar(self, 1),
                         }
-
-        self.thf1_var = IntVar(self, 40)
-        self.tpf1_var = IntVar(self, 1000)
-        self.method1_var = StringVar(self, "Slope")
-        self.step1_var = IntVar(self, 1)
-        self.thf2_var = IntVar(self, 40)
-        self.tpf2_var = IntVar(self, 1000)
-        self.method2_var = StringVar(self, None)
-        self.step2_var = IntVar(self, None)
-
+        self.filter2 = {
+                        "method": StringVar(self, None),
+                        "threshold": IntVar(self, 40),
+                        "time_period": IntVar(self, 1000),
+                        "step": IntVar(self, 1),
+                        }
         self.spike_detected = {
                                 "filter1_nb":IntVar(self, 0),
-                                "fil1_tab": None,
                                 "filter2_nb":IntVar(self, 0),
-                                "fil2_tab": None,
                                 }
 
+        ########################################################################
         ####################            menu bar            ####################
+        ########################################################################
+        
         self.menubar = Menu(self)
-        self.menubar.add_command(label="Open", command=self.open)
+        self.menubar.add_command(label="Open",
+                                 command=self.open,
+                                 accelerator="Ctrl + O")
         self.menubar.add_command(label="Help", command=self.help)
         self.window.config(menu=self.menubar)
+        self.menubar.bind_all("<Control-o>", self.open)
 
+        ########################################################################
         ####################       frame for drawing        ####################
+        ########################################################################
+        
         self.plotframe = Frame(self, width=8*100+10, height=6*100)
         self.plotframe.grid(column=1, row=1, rowspan=4)
 
+        ########################################################################
         ####################     frame for information      ####################
+        ########################################################################
+        
         self.infoframe = LabelFrame(self, text="Infos", width=30)
         self.infoframe.grid(column=2, row=1, padx=5, sticky=N)
 
-        Label(self.infoframe, text="File name:").grid(column=1, row=1, sticky=W)
-        Label(self.infoframe, text="File lenght:").grid(column=1, row=2, sticky=W)
+        Label(self.infoframe,
+              text="File name:").grid(column=1, row=1, sticky=W)
+        Label(self.infoframe,
+              text="File lenght:").grid(column=1, row=2, sticky=W)
 
-        Label(self.infoframe, textvariable=self.fshortname).grid(column=2, row=1, sticky=E)
-        Label(self.infoframe, textvariable=self.flenght).grid(column=2, row=2, sticky=E)
+        Label(self.infoframe,
+              textvariable=self.fshortname).grid(column=2, row=1, sticky=E)
+        Label(self.infoframe,
+              textvariable=self.flenght).grid(column=2, row=2, sticky=E)
 
-        self.filter_one = LabelFrame(self.infoframe, text="Filter 1", width=15)
-        self.filter_one.grid(column=1, row=3, sticky=W)
-        Label(self.filter_one, text="Method:").grid(column=1, row=1, sticky=W)
-        Label(self.filter_one, textvariable=self.method1_var, width=5, anchor=E).grid(column=2, row=1, sticky=E)
-        Label(self.filter_one, text="Threshold:").grid(column=1, row=2, sticky=W)
-        Label(self.filter_one, textvariable=self.thf1_var).grid(column=2, row=2, sticky=E)
-        Label(self.filter_one, text="Time period:").grid(column=1, row=3, sticky=W)
-        Label(self.filter_one, textvariable=self.tpf1_var).grid(column=2, row=3, sticky=E)
-        Label(self.filter_one, text="Step:").grid(column=1, row=4, sticky=W)
-        Label(self.filter_one, textvariable=self.step1_var).grid(column=2, row=4, sticky=E)
-        Label(self.filter_one, text="Spike(s) detected:").grid(column=1, row=5, sticky=W)
-        Label(self.filter_one, textvariable=self.spike_detected["filter1_nb"]).grid(column=2, row=5, sticky=E)
-        
-        self.filter_two = LabelFrame(self.infoframe, text="Filter 2", width=15)
-        self.filter_two.grid(column=2, row=3, sticky=E)
-        Label(self.filter_two, text="Method:").grid(column=1, row=1, sticky=W)
-        Label(self.filter_two, textvariable=self.method2_var, width=5, anchor=E).grid(column=2, row=1, sticky=E)
-        Label(self.filter_two, text="Threshold:").grid(column=1, row=2, sticky=W)
-        Label(self.filter_two, textvariable=self.thf2_var).grid(column=2, row=2, sticky=E)
-        Label(self.filter_two, text="Time period:").grid(column=1, row=3, sticky=W)
-        Label(self.filter_two, textvariable=self.tpf2_var).grid(column=2, row=3, sticky=E)
-        Label(self.filter_two, text="Step:").grid(column=1, row=4, sticky=W)
-        Label(self.filter_two, textvariable=self.step2_var).grid(column=2, row=4, sticky=E)
-        Label(self.filter_two, text="Spike(s) detected:").grid(column=1, row=5, sticky=W)
-        Label(self.filter_two, textvariable=self.spike_detected["filter2_nb"]).grid(column=2, row=5, sticky=E)
+        InfoFiltre(self.infoframe,
+                   self.filter1,
+                   self.spike_detected["filter1_nb"],
+                   text="Filter 1",
+                   width=15).grid(column=1, row=3, sticky=W)
+
+        InfoFiltre(self.infoframe,
+                   self.filter2,
+                   self.spike_detected["filter2_nb"],
+                   text="Filter 2",
+                   width=15).grid(column=2, row=3, sticky=E)
 
         for child in self.infoframe.winfo_children():
             child.grid_configure(padx=5, pady=5)
 
+        ########################################################################
         ####################       frame for options        ####################
+        ########################################################################
+
         self.optionframe = LabelFrame(self, text="Display Options", width=30)
         self.optionframe.grid(column=2, row=2, sticky=N, padx=5)
 
-        Label(self.optionframe, text="Starting time:").grid(column=1, row=1, sticky=W)        
+        Label(self.optionframe,
+              text="Starting time:").grid(column=1, row=1, sticky=W)        
         self.start_time = Entry(self.optionframe,
                                 textvariable=self.time["start"],
                                 justify="right",
                                 width=8)
         self.start_time.grid(column=2, row=1, sticky=E)
 
-        Label(self.optionframe, text="Ending time:").grid(column=1, row=2, sticky=W)      
+        Label(self.optionframe,
+              text="Ending time:").grid(column=1, row=2, sticky=W)      
         self.end_time = Entry(self.optionframe,
                                 textvariable=self.time["end"],
                                 justify="right",
                                 width=8)
         self.end_time.grid(column=2, row=2, sticky=E)
 
-        self.filter1 = Checkbutton(self.optionframe,
+        self.filter_check1 = Checkbutton(self.optionframe,
                                    text="Filter 1",
                                    justify="left",
                                    var=self.options["f1"])
-        self.filter1.grid(column=1, row=3, sticky=W)
-        self.filter2 = Checkbutton(self.optionframe,
+        self.filter_check1.grid(column=1, row=3, sticky=W)
+        self.filter_check2 = Checkbutton(self.optionframe,
                                    text="Filter 2",
                                    var=self.options["f2"])
-        self.filter2.grid(column=2, row=3, sticky=W)
+        self.filter_check2.grid(column=2, row=3, sticky=W)
         self.ma = Checkbutton(self.optionframe,
                               text="Moving average",
                               var=self.options["mov"])
@@ -179,89 +365,30 @@ class Sdgi(Frame):
         for child in self.optionframe.winfo_children():
             child.grid_configure(padx=3, pady=3)
 
+        ########################################################################
         ####################       frame for filters        ####################
+        ########################################################################
+
         self.filterframe = LabelFrame(self, text="Spikes Filters", width=30)
         self.filterframe.grid(column=2, row=3, sticky=N)
+        
+        SettingFiltre(self.filterframe,
+                      self.filter1,
+                      text="Filter 1",
+                      width=15).pack(side=LEFT)
 
-        self.setf1 = LabelFrame(self.filterframe, text="Filter 1", width=15)
-        self.setf1.pack(side=LEFT)
-        Label(self.setf1, text="Threshold:").grid(column=1, row=1, sticky=W)
-        self.thf1 = Entry(self.setf1,
-                          textvariable=self.thf1_var,
-                          width=5,
-                          justify="right")
-        self.thf1.grid(column=2, row=1)
-
-        Label(self.setf1, text="Time Period:").grid(column=1, row=2, sticky=W)
-        self.tpf1 = Entry(self.setf1,
-                          textvariable=self.tpf1_var,
-                          width=5,
-                          justify="right")
-        self.tpf1.grid(column=2, row=2)
-
-        Label(self.setf1, text="Method:").grid(column=1, row=3, sticky=W)
-        self.method1 = Menubutton(self.setf1,
-                                  textvariable=self.method1_var,
-                                  width=6, relief=RAISED)
-        self.method1.menu = Menu(self.method1, tearoff=0)
-        self.method1["menu"] = self.method1.menu
-        self.method1.menu.add_radiobutton(label=None, variable=self.method1_var, command=self.add_step)
-        self.method1.menu.add_radiobutton(label="Slope", variable=self.method1_var, command=self.add_step)
-        self.method1.menu.add_radiobutton(label="Upper", variable=self.method1_var, command=self.add_step)
-        self.method1.menu.add_radiobutton(label="Lower", variable=self.method1_var, command=self.add_step)
-        self.method1.menu.add_radiobutton(label="Both", variable=self.method1_var, command=self.add_step)
-        self.method1.grid(column=2, row=3, padx=5, pady=5)
-
-        Label(self.setf1, text="Step:").grid(column=1, row=4, sticky=W)
-        self.stf1 = Entry(self.setf1,
-                          textvariable=self.step1_var,
-                          width=5,
-                          justify="right")
-        self.stf1.grid(column=2, row=4)
-
-        self.setf2 = LabelFrame(self.filterframe, text="Filter 2", width=15)
-        self.setf2.pack(side=LEFT)
-        Label(self.setf2, text="Threshold:").grid(column=1, row=1, sticky=W)
-        self.thf2 = Entry(self.setf2,
-                          textvariable=self.thf2_var,
-                          width=5,
-                          justify="right")
-        self.thf2.grid(column=2, row=1)
-
-        Label(self.setf2, text="Time Period:").grid(column=1, row=2, sticky=W)
-        self.tpf2 = Entry(self.setf2,
-                          textvariable=self.tpf2_var,
-                          width=5,
-                          justify="right")
-        self.tpf2.grid(column=2, row=2)
-
-        Label(self.setf2, text="Method:").grid(column=1, row=3, sticky=W)
-        self.method2 = Menubutton(self.setf2, textvariable=self.method2_var, width=6, relief=RAISED)
-        self.method2.menu = Menu(self.method2, tearoff=0)
-        self.method2["menu"] = self.method2.menu
-        self.method2.menu.add_radiobutton(label=None, variable=self.method2_var, command=self.add_step)
-        self.method2.menu.add_radiobutton(label="Slope", variable=self.method2_var, command=self.add_step)
-        self.method2.menu.add_radiobutton(label="Upper", variable=self.method2_var, command=self.add_step)
-        self.method2.menu.add_radiobutton(label="Lower", variable=self.method2_var, command=self.add_step)
-        self.method2.menu.add_radiobutton(label="Both", variable=self.method2_var, command=self.add_step)
-        self.method2.grid(column=2, row=3, padx=5, pady=5)
-
-        Label(self.setf2, text="Step:").grid(column=1, row=4, sticky=W)
-        self.stf2 = Entry(self.setf2,
-                          textvariable=self.step2_var,
-                          width=5,
-                          justify="right",
-                          state="disabled")
-        self.stf2.grid(column=2, row=4)
+        SettingFiltre(self.filterframe,
+                      self.filter2,
+                      text="Filter 2",
+                      width=15).pack(side=LEFT)
 
         for child in self.filterframe.winfo_children():
             child.pack_configure(padx=5, pady=5)
-        for child in self.setf1.winfo_children():
-            child.grid_configure(padx=5)
-        for child in self.setf2.winfo_children():
-            child.grid_configure(padx=5)
 
+        ########################################################################
         ####################       frame for button         ####################
+        ########################################################################
+
         self.buttonframe = Frame(self, width=30)
         self.buttonframe.grid(column=2, row=4, sticky=N)
 
@@ -282,9 +409,13 @@ class Sdgi(Frame):
         for child in self.buttonframe.winfo_children():
             child.grid_configure(padx=5, pady=5)
 
+    ############################################################################
+    ############################################################################
     ######################        menu method         ##########################
+    ############################################################################
+    ############################################################################
 
-    def open(self):
+    def open(self, *args):
         """
         open a file on your computer
         return data
@@ -307,7 +438,11 @@ class Sdgi(Frame):
         """ return https://github.com/Houet/Japon """
         return wbopen("https://github.com/Houet/Japon")
     
+    ############################################################################
+    ############################################################################
     ######################       button method        ##########################
+    ############################################################################
+    ############################################################################
 
     def refresh(self):
         """ """
@@ -342,100 +477,83 @@ class Sdgi(Frame):
                         parent=self.window)
         return
 
+    ############################################################################
+    ############################################################################
     ######################        other method         #########################
-
-    def add_step(self):
-        """ change the apparence of step entry widget """
-        if self.method1_var.get() == "Slope":
-            self.step1_var.set(1)
-            self.stf1["state"] = "normal"
-        else:
-            self.step1_var.set(None)
-            self.stf1["state"] = "disabled"
-
-        if self.method2_var.get() == "Slope":
-            self.step2_var.set(1)
-            self.stf2["state"] = "normal"
-        else:
-            self.step2_var.set(None)
-            self.stf2["state"] = "disabled"
-
-    def filter_method(self):
-        """ return method to use to apply filter """
-        axe = [int(self.time["start"].get()*1000), int(self.time["end"].get()*1000)]
-        d_use = self.data[axe[0]:axe[1]]
-
-        th1 = self.thf1_var.get()
-
-        if self.method1_var.get() == "Slope":
-            self.spike_detected["fil1_tab"] = filtre(spike_detection(d_use, th1, step=self.step1_var.get()))
-        elif self.method1_var.get() == "Upper":
-            self.spike_detected["fil1_tab"] = filtre(get_upper(d_use, mm(d_use, th1)[1]))
-        elif self.method1_var.get() == "Lower":
-            self.spike_detected["fil1_tab"] = filtre(get_lower(d_use, mm(d_use, th1)[2]))
-        elif self.method1_var.get() == "Both":
-            self.spike_detected["fil1_tab"] = filtre(get_double_ekips(d_use, mm(d_use, th1)))
-        else:
-            self.spike_detected["fil1_tab"] = []  
-
-        th2 = self.thf2_var.get()
-
-        if self.method2_var.get() == "Slope":
-            self.spike_detected["fil2_tab"] = filtre(spike_detection(d_use, th2, step=self.step2_var.get()))
-        elif self.method2_var.get() == "Upper":
-            self.spike_detected["fil2_tab"] = filtre(get_upper(d_use, mm(d_use, th2)[1]))
-        elif self.method2_var.get() == "Lower":
-            self.spike_detected["fil2_tab"] = filtre(get_lower(d_use, mm(d_use, th2)[2]))
-        elif self.method2_var.get() == "Both":
-            self.spike_detected["fil2_tab"] = filtre(get_double_ekips(d_use, mm(d_use, th2)))
-        else:
-            self.spike_detected["fil2_tab"] = []
-
-        self.spike_detected["filter1_nb"].set(self.spike_detected["fil1_tab"].count(1))
-        self.spike_detected["filter2_nb"].set(self.spike_detected["fil2_tab"].count(1))   
-
-        return
+    ############################################################################
+    ############################################################################
 
     def plot(self):
         """ plot the figure """
 
-        axe = [int(self.time["start"].get()*1000), int(self.time["end"].get()*1000)]
+        axe = [int(self.time["start"].get()*1000),
+               int(self.time["end"].get()*1000)]
         d_use = self.data[axe[0]:axe[1]]
 
-        self.filter_method()
+        filtre1 = Filtre(self.filter1["method"].get(),
+                         self.filter1["threshold"].get(),
+                         self.filter1["time_period"].get(),
+                         self.filter1["step"].get())
+
+        filtre2 = Filtre(self.filter2["method"].get(),
+                         self.filter2["threshold"].get(),
+                         self.filter2["time_period"].get(),
+                         self.filter2["step"].get())
 
         numero = 111
         if self.firing_rate.get():
             numero = 311
-            if self.method2_var.get() == "":
-                if self.method1_var.get() != None:
+            if self.filter2["method"].get() == "":
+                if self.filter1["method"].get() != None:
                     numero = 211
-            elif self.method1_var.get() == "":
-                if self.method2_var.get() != None:
+            elif self.filter1["method"].get() == "":
+                if self.filter2["method"].get() != None:
                     numero = 211
 
         fig = plot(self.data,
                    axe,
                    numero,
-                   self.spike_detected["fil1_tab"],
-                   self.spike_detected["fil2_tab"],
-                   self.thf1_var.get(),
-                   self.thf2_var.get(),
+                   filtre1.get_spike(d_use),
+                   filtre2.get_spike(d_use),
+                   self.filter1["threshold"].get(),
+                   self.filter2["threshold"].get(),
                    **self.options)
 
+        self.spike_detected["filter1_nb"].set(filtre1.number_spikes)
+        self.spike_detected["filter2_nb"].set(filtre2.number_spikes)
+        
         if numero == 211:
-            if self.method1_var.get() != "":
-                if len(self.spike_detected["fil1_tab"]) != 0:
-                    plot_graphe(fig, axe, "Filter 1", self.spike_detected["fil1_tab"], self.tpf1_var.get(), 212, "y")
+            if self.filter1["method"].get() != "":
+                plot_graphe(fig, axe,
+                            "Filter 1",
+                            filtre1.firing_rate(),
+                            filtre1.time_period,
+                            212,
+                            "y")
             else:
-                if len(self.spike_detected["fil2_tab"]) != 0:
-                    plot_graphe(fig, axe, "Filter 2", self.spike_detected["fil2_tab"], self.tpf2_var.get(), 212, "g")
+                plot_graphe(fig,
+                            axe,
+                            "Filter 2",
+                            filtre2.firing_rate(),
+                            filtre2.time_period,
+                            212,
+                            "g")
 
         if numero == 311:
-            if len(self.spike_detected["fil1_tab"]) != 0:
-                plot_graphe(fig, axe, "Filter 1", self.spike_detected["fil1_tab"], self.tpf1_var.get(), 312,"y")
-            if len(self.spike_detected["fil2_tab"]) != 0:
-                plot_graphe(fig, axe, "Filter 2", self.spike_detected["fil2_tab"], self.tpf2_var.get(), 313, "g")
+            plot_graphe(fig,
+                        axe,
+                        "Filter 1",
+                        filtre1.firing_rate(),
+                        filtre1.time_period,
+                        312,
+                        "y")
+            plot_graphe(fig,
+                        axe,
+                        "Filter 2",
+                        filtre2.firing_rate(),
+                        filtre2.time_period,
+                        313,
+                        "g")
         return fig
 
 

@@ -183,7 +183,7 @@ def plot(dat, axe, fig_number, filter1, filter2, th1, th2, f1=False, f2=False, m
 def plot_graphe(fig, axis, name, spike, tp, num_fig, color):
     """"""
     bx = fig.add_subplot(num_fig)
-    Y = number_spike(spike, tp)
+    Y = spike
     X2 = [i*tp/1000 + axis[0]/1000 for i in range(len(Y))]
     bx.bar(X2, Y, color=color, width=tp/1000)
     bx.axis([axis[0]/1000, axis[1]/1000, 0, max(Y) + 2])
