@@ -33,6 +33,7 @@ class Filtre(object):
         self.step = step
         self.tab_spikes = []
         self.number_spikes = self.tab_spikes.count(1)
+        self.info_spike = []
         self.moving_average = []
 
     def get_spike(self, data):
@@ -43,12 +44,12 @@ class Filtre(object):
                     "Lower": self.get_spike_lower,
                     "Both": self.get_spike_both,
                     }
-        if self.methode != "Slope":
-            self.ma(data)
+        self.ma(data)
         if self.methode != "":
             self.tab_spikes = methode[self.methode](data)
             self.tab_spikes = self.filtre()
         self.number_spikes = self.tab_spikes.count(1)
+        self.info_spike = self.get_info(data)
         return self.tab_spikes
 
     def ma(self, data):
@@ -116,14 +117,54 @@ class Filtre(object):
     def firing_rate(self):
         """
         sum the number of spike in a time period
-        sp = spike recorded as given by spike_detection function
-        tp = time period given
 
-        return a list
+        return a list and a signal
         number spike /period 1, 2, etc
+        signal is the offset made by moving average,
+        len moving average is [10: ..] so you have to be aware of this.
         """
-        return [self.tab_spikes[i:i + self.time_period].count(1) 
+        tab_y = [self.tab_spikes[i:i + self.time_period].count(1) 
                 for i in range(0, len(self.tab_spikes), self.time_period)]
+        signal = 0
+        if self.methode != "Slope" and self.time_period <= 10:
+            signal = 0.01
+        return tab_y, signal
+
+    def get_info(self, data):
+        """
+        provide information about spike
+        such as spike highest value
+        spike lowest value
+        time du spike
+        """
+        # prise en compte du fait que la detection par une methode autre que
+        # slope implique un décalage de 10 ms, donc l'offset permet de rattraper
+        # cela, et vaut donc 0 quand la methode est slope
+        offset = 0
+        if self.methode != "Slope":
+            data = data[10:-11]
+            offset = 10
+        tab = []
+        for i in range(len(self.tab_spikes)):
+            if self.tab_spikes[i] == 1:
+                try :
+                    tab.append({
+                            "time": (i + offset)/1000,
+                             "highest value": max(data[i - 5: i + 5]),
+                            "lowest value": min(data[i - 5: i + 5]),
+                            })
+                except ValueError:
+                    # print("i", i)
+                    essai = min(len(data[:i]), len(data[i:]), 5)
+                    # print("essai avec :", essai)
+                    tab.append({
+                            "time": (i + offset)/1000,
+                             "highest value": max(data[i - essai: i + essai]),
+                            "lowest value": min(data[i - essai: i + essai]),
+                            })
+            else:
+                tab.append(0)
+        return tab
 
 
 class InfoFiltre(LabelFrame):
@@ -430,6 +471,7 @@ class Sdgi(Frame):
         else:
             self.fshortname.set(self.fname.get().split("/")[-1])
             self.flenght.set(len(self.data)/1000)
+            self.time["start"].set(0)
             self.time["end"].set(self.flenght.get())
             self.refresh()
         return
@@ -448,20 +490,48 @@ class Sdgi(Frame):
         """ """
         for w in self.plotframe.winfo_children():
             w.destroy()
+        
+        filtre1 = Filtre(self.filter1["method"].get(),
+                         self.filter1["threshold"].get(),
+                         self.filter1["time_period"].get(),
+                         self.filter1["step"].get())
+
+        filtre2 = Filtre(self.filter2["method"].get(),
+                         self.filter2["threshold"].get(),
+                         self.filter2["time_period"].get(),
+                         self.filter2["step"].get())
+        
         try:
-            self.fig = self.plot()
+            self.fig = self.plot(filtre1, filtre2)
         except AttributeError:
             showwarning(title="Error",
                         message="No data to plot...",
                         parent=self.window)
-        except ValueError:
+        except FilterError as f:
             showwarning(title="Error",
-                        message="Issue with filter...",
+                        message="Can't plot {}".format(f),
+                        parent=self.window)
+        except FileError:
+            showwarning(title="Error",
+                        message="Wrong file...",
                         parent=self.window)
         else:
             canvas = FigureCanvasTkAgg(self.fig, master=self.plotframe)
             canvas.show()
             canvas.get_tk_widget().pack()
+
+            ClicPosition(self.fig,
+                        ("filter 1", filtre1),
+                        self.time["start"].get(),
+                        self.plotframe,
+                        0)
+
+            ClicPosition(self.fig,
+                        ("filter 2", filtre2),
+                        self.time["start"].get(),
+                        self.plotframe,
+                        -80)
+
         return
 
     def save(self):
@@ -483,22 +553,12 @@ class Sdgi(Frame):
     ############################################################################
     ############################################################################
 
-    def plot(self):
+    def plot(self, filtre1, filtre2):
         """ plot the figure """
 
         axe = [int(self.time["start"].get()*1000),
                int(self.time["end"].get()*1000)]
         d_use = self.data[axe[0]:axe[1]]
-
-        filtre1 = Filtre(self.filter1["method"].get(),
-                         self.filter1["threshold"].get(),
-                         self.filter1["time_period"].get(),
-                         self.filter1["step"].get())
-
-        filtre2 = Filtre(self.filter2["method"].get(),
-                         self.filter2["threshold"].get(),
-                         self.filter2["time_period"].get(),
-                         self.filter2["step"].get())
 
         numero = 111
         if self.firing_rate.get():
@@ -515,6 +575,7 @@ class Sdgi(Frame):
                    numero,
                    filtre1.get_spike(d_use),
                    filtre2.get_spike(d_use),
+                   filtre1.moving_average,
                    self.filter1["threshold"].get(),
                    self.filter2["threshold"].get(),
                    **self.options)
@@ -554,6 +615,7 @@ class Sdgi(Frame):
                         filtre2.time_period,
                         313,
                         "g")
+
         return fig
 
 

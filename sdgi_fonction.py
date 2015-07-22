@@ -5,6 +5,55 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from math import ceil
 
+from tkinter import *
+
+
+class FileError(ValueError):
+    """ exception raise when trying to use wrong file """
+    pass
+
+
+class FilterError(ValueError):
+    """ execption raise when trying to plot a non define filter """
+    def __init__(self, filtre):
+        self.filtre = filtre
+    def __str__(self):
+        return self.filtre
+
+
+class ClicPosition():
+    def __init__(self, fig, filtre, start, canvas, offset):
+        fig.canvas.mpl_connect("button_press_event", self)
+        self.x = None
+        self.name = filtre[0]
+        self.filtre = filtre[1]
+        self.spike = filtre[1].tab_spikes
+        self.start = start
+        self.canvas = canvas
+        self.label = Label(self.canvas)
+        self.offset = offset
+        
+    def __call__(self, event):
+        if not event.inaxes:
+            return
+        self.x = int((event.xdata - self.start)*1000)
+        if self.filtre.methode != "Slope":
+            self.x -= 10
+
+        if 1 in self.spike[self.x-5: self.x+5]:
+            indice = self.spike[self.x-5: self.x+5].index(1)
+            
+            tab_info = self.filtre.info_spike[self.x + (indice-5)]
+            self.label.destroy()
+            texte = "Filter: {}\nTime: {}\nHighest val: {highest value}\nLowest value: {lowest value}".format(self.name, tab_info["time"]+self.start, **tab_info)
+            self.label = Label(self.canvas, text=texte, relief=RIDGE, bg="white")
+            if event.x < 400:
+                self.label.place(x=event.x + 10, y=(600 - event.y) + self.offset)
+            else:
+                self.label.place(x=event.x - 170, y=(600 - event.y) + self.offset)
+        else:
+            self.label.destroy()
+
 
 def load_file(fname):
     """
@@ -20,111 +69,12 @@ def load_file(fname):
     return header, [float(i[1]) for i in data]
 
 
-def spike_detection(rs, th, step=1):
-    """
-    record spike position from a signal
-    rs = recorded signal
-    step = time between two comparison in ms
-    th = detection threshold
-
-    return a list where
-    1 is when a spike is detected
-    0 when not detected
-    """
-    toreturn = [0 for i in range(len(rs))]
-    for t in range(1, len(rs), step):
-        if rs[t] - rs[t - 1] < - th:
-            toreturn[t - 1] = 1
-            continue
-    return toreturn
-
-
-def mm(data, th):
-    """
-    return 
-    the moving average of data
-    moving average + threshold
-    moving average - threshold
-    """
-    tab = []
-    tabth = []
-    tab_th = []
-    debut = sum(data[:20])/20
-    for i in range(10, len(data)-11):
-        debut += (data[i+10 +1] - data[i-10 +1])/20
-        tab.append(debut)
-        tabth.append(debut + th)
-        tab_th.append(debut - th)
-    return tab, tabth, tab_th
-
-
-def get_upper(data, mm):
-    """
-    gets spikes using moving average
-    """
-    tab = []
-    for i in range(len(mm)):
-        if data[i+10] > mm[i]:
-            tab.append(1)
-        else:
-            tab.append(0)
-    return tab
-
-def get_lower(data, mm):
-    """
-    gets spikes using moving average
-    """
-    tab = []
-    for i in range(len(mm)):
-        if data[i+10] < mm[i]:
-            tab.append(1)
-        else:
-            tab.append(0)
-    return tab
-
-def get_double_ekips(data, mm):
-    """
-    get spike which are higher than moving average + threshold
-    and smaller than moving average - threshold
-    """
-    tab = [0 for i in range(len(mm[0]))]
-    for i in range(len(mm[0])-10):
-        if data[i+10] > mm[1][i]:
-            for j in range(5):
-                if data[i+10+j] < mm[2][i+j]:
-                    tab[i]=1
-                    break
-    return tab
-
-
-def filtre(sp):
-    """
-    transform 01110 signal into 01000 signal
-    detect one 'true' spike instead of three
-    """
-    tab = [0 for i in sp]
-    for i in range(1, len(sp)):
-        if sp[i] != sp[i-1] and sp[i] == 1:
-                tab[i] = 1
-    return tab
-
-
-def number_spike(sp, tp=100):
-    """
-    sum the number of spike in a time period
-    sp = spike recorded as given by spike_detection function
-    tp = time period given
-
-    return a list
-    number spike /period 1, 2, etc
-    """
-    return [sp[i:i + tp].count(1) for i in range(0, len(sp), tp)]
-
-
-def plot(dat, axe, fig_number, filter1, filter2, th1, th2, f1=False, f2=False, mov=False, mov_up_1=False, mov_down_1=False, mov_up_2=False, mov_down_2=False):
+def plot(dat, axe, fig_number, filter1, filter2, mm, th1, th2,
+         f1=False, f2=False, mov=False,
+         mov_up_1=False, mov_down_1=False, mov_up_2=False, mov_down_2=False):
     """
     trace la figure comme il faut 
-    fig =  figure sur laquelle tracer
+    fig = figure sur laquelle tracer
     """
 
     fig = Figure(figsize=(8, 6),
@@ -146,36 +96,49 @@ def plot(dat, axe, fig_number, filter1, filter2, th1, th2, f1=False, f2=False, m
         x_use_2 = x_use
     
     d_use = dat[axe[0]:axe[1]]
+    mm_up_1 = [ i + th1 for i in mm]
+    mm_down_1 = [ i - th1 for i in mm]
+    mm_up_2 = [ i + th2 for i in mm]
+    mm_down_2 = [ i - th2 for i in mm]
 
     ax1 = fig.add_subplot(fig_number)
     ax1.set_ylabel("Amplitude ($\mu$V)")
     ax1.grid(True)
-    ax1.axis([axe[0]/1000, axe[1]/1000, min(d_use)-10, max(d_use)+10])
+    try:
+        ax1.axis([axe[0]/1000, axe[1]/1000, min(d_use)-10, max(d_use)+10])
+    except ValueError:
+        raise FileError
     ax1.plot(x_use, d_use, "r")
 
     ax2 = ax1.twinx()
     ax2.axis([axe[0]/1000, axe[1]/1000, 0, 1])
 
-    if f1.get():
-        ax2.plot(x_use_1, filter1, "y")
+    try:
+        if f1.get():
+            ax2.plot(x_use_1, filter1, "y")
+    except ValueError:
+        raise FilterError("Filter 1")
 
-    if f2.get():
-        ax2.plot(x_use_2, filter2, "g")
+    try:
+        if f2.get():
+            ax2.plot(x_use_2, filter2, "g")
+    except ValueError:
+        raise FilterError("Filter 2")
 
     if mov.get():
-        ax1.plot(x_use[10:-11], mm(d_use, th1)[0], "b", ls="--")
+        ax1.plot(x_use[10:-11], mm, "b", ls="--")
 
     if mov_up_1.get():
-        ax1.plot(x_use[10:-11], mm(d_use, th1)[1], "b")
+        ax1.plot(x_use[10:-11], mm_up_1, "b")
 
     if mov_down_1.get():
-        ax1.plot(x_use[10:-11], mm(d_use, th1)[2], "b")
+        ax1.plot(x_use[10:-11], mm_down_1, "b")
 
     if mov_up_2.get():
-        ax1.plot(x_use[10:-11], mm(d_use, th2)[1], "k")
+        ax1.plot(x_use[10:-11], mm_up_2, "k")
 
     if mov_down_2.get():
-        ax1.plot(x_use[10:-11], mm(d_use, th2)[2], "k")
+        ax1.plot(x_use[10:-11], mm_down_2, "k")
 
     return fig
 
@@ -183,8 +146,8 @@ def plot(dat, axe, fig_number, filter1, filter2, th1, th2, f1=False, f2=False, m
 def plot_graphe(fig, axis, name, spike, tp, num_fig, color):
     """"""
     bx = fig.add_subplot(num_fig)
-    Y = spike
-    X2 = [i*tp/1000 + axis[0]/1000 for i in range(len(Y))]
+    Y, signal = spike
+    X2 = [i*tp/1000 + signal + axis[0]/1000 for i in range(len(Y))]
     bx.bar(X2, Y, color=color, width=tp/1000)
     bx.axis([axis[0]/1000, axis[1]/1000, 0, max(Y) + 2])
     bx.set_xlabel("Time (s)")
