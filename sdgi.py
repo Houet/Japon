@@ -123,8 +123,11 @@ class Filtre(object):
         signal is the offset made by moving average,
         len moving average is [10: ..] so you have to be aware of this.
         """
-        tab_y = [self.tab_spikes[i:i + self.time_period].count(1) 
-                for i in range(0, len(self.tab_spikes), self.time_period)]
+        try:
+            tab_y = [self.tab_spikes[i:i + self.time_period].count(1) 
+                    for i in range(0, len(self.tab_spikes), self.time_period)]
+        except ValueError:
+            raise TimeperiodError(self.time_period)
         signal = 0
         if self.methode != "Slope" and self.time_period <= 10:
             signal = 0.01
@@ -154,7 +157,7 @@ class Filtre(object):
                             "lowest value": min(data[i - 5: i + 5]),
                             })
                 except ValueError:
-                    print("i", i)
+                    # print("i", i)
                     essai = min(len(data[:i]), len(data[i:]), 5)
                     # print("essai avec :", essai)
                     tab.append({
@@ -506,13 +509,21 @@ class Sdgi(Frame):
             showwarning(title="Error",
                         message="No data to plot...",
                         parent=self.window)
+        except TimeperiodError as t:
+            showwarning(title="Error",
+                        message="Incorrect value for time period:{}".format(t),
+                        parent=self.window)
+        except IndexError:
+            showwarning(title="Error",
+                        message="Incorrect value for step",
+                        parent=self.window)
         except FilterError as f:
             showwarning(title="Error",
                         message="Can't plot {}".format(f),
                         parent=self.window)
         except FileError:
             showwarning(title="Error",
-                        message="Wrong file...",
+                        message="Issue with axis or uncompatible file...",
                         parent=self.window)
         else:
             canvas = FigureCanvasTkAgg(self.fig, master=self.plotframe)

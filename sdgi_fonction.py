@@ -21,6 +21,14 @@ class FilterError(ValueError):
         return self.filtre
 
 
+class TimeperiodError(ValueError):
+    """ exception raise when time period value is unvalid """
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "{}".format(self.value)
+
+
 class ClicPosition():
     def __init__(self, fig, filtre, start, canvas, offset):
         fig.canvas.mpl_connect("button_press_event", self)
@@ -119,29 +127,31 @@ def plot(dat, axe, fig_number, filter1, filter2, mm, th1, th2,
     try:
         if f1.get():
             ax2.plot(x_use_1, filter1, "y")
+
+        if mov_up_1.get():
+            ax1.plot(x_use[10:-11], mm_up_1, "b")
+
+        if mov_down_1.get():
+            ax1.plot(x_use[10:-11], mm_down_1, "b")
     except ValueError:
         raise FilterError("Filter 1")
 
     try:
         if f2.get():
             ax2.plot(x_use_2, filter2, "g")
+
+        if mov_up_2.get():
+            ax1.plot(x_use[10:-11], mm_up_2, "k")
+
+        if mov_down_2.get():
+            ax1.plot(x_use[10:-11], mm_down_2, "k")
     except ValueError:
         raise FilterError("Filter 2")
 
     if mov.get():
         ax1.plot(x_use[10:-11], mm, "b", ls="--")
 
-    if mov_up_1.get():
-        ax1.plot(x_use[10:-11], mm_up_1, "b")
 
-    if mov_down_1.get():
-        ax1.plot(x_use[10:-11], mm_down_1, "b")
-
-    if mov_up_2.get():
-        ax1.plot(x_use[10:-11], mm_up_2, "k")
-
-    if mov_down_2.get():
-        ax1.plot(x_use[10:-11], mm_down_2, "k")
 
     return fig
 
@@ -150,9 +160,12 @@ def plot_graphe(fig, axis, name, spike, tp, num_fig, color):
     """"""
     bx = fig.add_subplot(num_fig)
     Y, signal = spike
-    X2 = [i*tp/1000 + signal + axis[0]/1000 for i in range(len(Y))]
-    bx.bar(X2, Y, color=color, width=tp/1000)
-    bx.axis([axis[0]/1000, axis[1]/1000, 0, max(Y) + 2])
+    try:
+        X2 = [i*tp/1000 + signal + axis[0]/1000 for i in range(len(Y))]
+        bx.bar(X2, Y, color=color, width=tp/1000)
+        bx.axis([axis[0]/1000, axis[1]/1000, 0, max(Y) + 2])
+    except ValueError:
+        raise TimeperiodError(tp)
     bx.set_xlabel("Time (s)")
     bx.set_ylabel("{}\nFiring rate".format(name))
     bx.grid(True)
