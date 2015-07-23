@@ -149,12 +149,12 @@ class Filtre(object):
             if self.tab_spikes[i] == 1:
                 try :
                     tab.append({
-                            "time": (i + offset)/1000,
+                            "time": (i + offset),
                              "highest value": max(data[i - 5: i + 5]),
                             "lowest value": min(data[i - 5: i + 5]),
                             })
                 except ValueError:
-                    # print("i", i)
+                    print("i", i)
                     essai = min(len(data[:i]), len(data[i:]), 5)
                     # print("essai avec :", essai)
                     tab.append({

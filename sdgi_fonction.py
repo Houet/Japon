@@ -45,7 +45,10 @@ class ClicPosition():
             
             tab_info = self.filtre.info_spike[self.x + (indice-5)]
             self.label.destroy()
-            texte = "Filter: {}\nTime: {}\nHighest val: {highest value}\nLowest value: {lowest value}".format(self.name, tab_info["time"]+self.start, **tab_info)
+            texte = "Filter: {}\nTime: {}\nHighest val: {highest value}\n\
+Lowest value: {lowest value}".format(self.name,
+                                     (tab_info["time"] + int(self.start*1000))/1000,
+                                     **tab_info)
             self.label = Label(self.canvas, text=texte, relief=RIDGE, bg="white")
             if event.x < 400:
                 self.label.place(x=event.x + 10, y=(600 - event.y) + self.offset)
