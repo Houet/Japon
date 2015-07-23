@@ -24,7 +24,7 @@ from sdgi_fonction import *
 
 
 class Filtre(object):
-    """ filtre de detection de spike """
+    """ Spike detection filter """
     def __init__(self, method=None, threshold=40, time_period=1000, step=1):
         """ methode could be: slope, upper, lower or both """
         self.methode = method
@@ -300,8 +300,7 @@ class Sdgi(Frame):
         
         self.menubar = Menu(self)
         self.menubar.add_command(label="Open",
-                                 command=self.open,
-                                 accelerator="Ctrl + O")
+                                 command=self.open)
         self.menubar.add_command(label="Help", command=self.help)
         self.window.config(menu=self.menubar)
         self.menubar.bind_all("<Control-o>", self.open)
