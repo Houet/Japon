@@ -124,6 +124,7 @@ def plot(dat, axe, fig_number, filter1, filter2, mm, th1, th2,
 
     ax2 = ax1.twinx()
     ax2.axis([axe[0]/1000, axe[1]/1000, 0, 1])
+    ax2.yaxis.set_visible(False)
 
     try:
         if f1.get():
