@@ -325,7 +325,7 @@ class Sdgi(Frame):
         Label(self.infoframe,
               text="File name:").grid(column=1, row=1, sticky=W)
         Label(self.infoframe,
-              text="File lenght:").grid(column=1, row=2, sticky=W)
+              text="File length:").grid(column=1, row=2, sticky=W)
 
         Label(self.infoframe,
               textvariable=self.fshortname).grid(column=2, row=1, sticky=E)

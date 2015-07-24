@@ -113,6 +113,7 @@ def plot(dat, axe, fig_number, filter1, filter2, mm, th1, th2,
     mm_down_2 = [ i - th2 for i in mm]
 
     ax1 = fig.add_subplot(fig_number)
+    ax1.set_xlabel("Time (s)")
     ax1.set_ylabel("Amplitude ($\mu$V)")
     ax1.grid(True)
     try:
