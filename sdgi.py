@@ -270,6 +270,10 @@ class Sdgi(Frame):
                     "start": DoubleVar(self, 0),
                     "end": DoubleVar(self, 0),
                     }
+        self.amplitude = {
+                          "start": IntVar(self, 0),
+                          "end": IntVar(self, 0),
+                         }
         self.options = {
                         "f1": BooleanVar(self, False),
                         "f2": BooleanVar(self, False),
@@ -280,6 +284,7 @@ class Sdgi(Frame):
                         "mov_down_2": BooleanVar(self, False),
                         }
         self.firing_rate = BooleanVar(self, False)
+        self.fr_adjust = BooleanVar(self, False)
         self.filter1 = {
                         "method": StringVar(self, "Slope"),
                         "threshold": IntVar(self, 40),
@@ -345,7 +350,7 @@ class Sdgi(Frame):
                    width=15).grid(column=2, row=3, sticky=E)
 
         for child in self.infoframe.winfo_children():
-            child.grid_configure(padx=5, pady=5)
+            child.grid_configure(padx=5, pady=3)
 
         ########################################################################
         ####################       frame for options        ####################
@@ -360,7 +365,7 @@ class Sdgi(Frame):
                                 textvariable=self.time["start"],
                                 justify="right",
                                 width=8)
-        self.start_time.grid(column=2, row=1, sticky=E)
+        self.start_time.grid(column=2, row=1, sticky=W)
 
         Label(self.optionframe,
               text="Ending time:").grid(column=1, row=2, sticky=W)      
@@ -368,42 +373,61 @@ class Sdgi(Frame):
                                 textvariable=self.time["end"],
                                 justify="right",
                                 width=8)
-        self.end_time.grid(column=2, row=2, sticky=E)
+        self.end_time.grid(column=2, row=2, sticky=W)
+
+        Label(self.optionframe,
+              text="Amplitude:").grid(column=3, row=1, sticky=W)
+        self.ampl_start = Entry(self.optionframe,
+                                textvariable=self.amplitude["start"],
+                                justify="right",
+                                width=10)
+        self.ampl_start.grid(column=4, row=1, sticky=W)
+
+        self.ampl_end = Entry(self.optionframe,
+                                textvariable=self.amplitude["end"],
+                                justify="right",
+                                width=10)
+        self.ampl_end.grid(column=4, row=2, sticky=W)
 
         self.filter_check1 = Checkbutton(self.optionframe,
                                    text="Filter 1",
                                    justify="left",
                                    var=self.options["f1"])
-        self.filter_check1.grid(column=1, row=3, sticky=W)
+        self.filter_check1.grid(column=1, columnspan=2, row=3, sticky=W)
         self.filter_check2 = Checkbutton(self.optionframe,
                                    text="Filter 2",
                                    var=self.options["f2"])
-        self.filter_check2.grid(column=2, row=3, sticky=W)
-        self.ma = Checkbutton(self.optionframe,
-                              text="Moving average",
-                              var=self.options["mov"])
-        self.ma.grid(column=2, row=4, sticky=W)
+        self.filter_check2.grid(column=3, columnspan=2, row=3, sticky=W)
         self.ma_up1 = Checkbutton(self.optionframe,
                                  text="Filter 1 Threshold up",
                                  var=self.options["mov_up_1"])
-        self.ma_up1.grid(column=1, row=5, sticky=W)
+        self.ma_up1.grid(column=1, columnspan=2, row=4, sticky=W)
         self.ma_down1 = Checkbutton(self.optionframe,
                                    text="Filter 1 Threshold down",
                                    var=self.options["mov_down_1"])
-        self.ma_down1.grid(column=1, row=6, sticky=W)
+        self.ma_down1.grid(column=1, columnspan=2, row=5, sticky=W)
         self.ma_up2 = Checkbutton(self.optionframe,
                                  text="Filter 2 Threshold up",
                                  var=self.options["mov_up_2"])
-        self.ma_up2.grid(column=2, row=5, sticky=W)
+        self.ma_up2.grid(column=3, columnspan=2, row=4, sticky=W)
         self.ma_down2 = Checkbutton(self.optionframe,
                                    text="Filter 2 Threshold down",
                                    var=self.options["mov_down_2"])
-        self.ma_down2.grid(column=2, row=6, sticky=W)
+        self.ma_down2.grid(column=3, columnspan=2, row=5, sticky=W)
+        self.ma = Checkbutton(self.optionframe,
+                              text="Moving average",
+                              var=self.options["mov"])
+        self.ma.grid(column=3, columnspan=2, row=6, sticky=W)
 
         self.fr = Checkbutton(self.optionframe,
                               text="Firing rate",
                               var=self.firing_rate)
-        self.fr.grid(column=1, row=4, sticky=W)
+        self.fr.grid(column=1, columnspan=2, row=6, sticky=W)
+
+        self.fr_scale = Checkbutton(self.optionframe,
+                                    text="Equal F.R. Scale",
+                                    var=self.fr_adjust)
+        self.fr_scale.grid(column=1, columnspan=2, row=7, sticky=W)
 
         for child in self.optionframe.winfo_children():
             child.grid_configure(padx=3, pady=3)
@@ -475,6 +499,8 @@ class Sdgi(Frame):
             self.flenght.set(len(self.data)/1000)
             self.time["start"].set(0)
             self.time["end"].set(self.flenght.get())
+            self.amplitude["start"].set(min(self.data) - 10)
+            self.amplitude["end"].set(max(self.data) + 10)
             self.refresh()
         return
 
@@ -570,6 +596,9 @@ class Sdgi(Frame):
                int(self.time["end"].get()*1000)]
         d_use = self.data[axe[0]:axe[1]]
 
+        axe.append(self.amplitude["start"].get())
+        axe.append(self.amplitude["end"].get())
+
         numero = 111
         if self.firing_rate.get():
             numero = 311
@@ -595,35 +624,42 @@ class Sdgi(Frame):
         
         if numero == 211:
             if self.filter1["method"].get() != "":
-                plot_graphe(fig, axe,
+                plot_graphe(fig, axe[:2],
                             "Filter 1",
                             filtre1.firing_rate(),
                             filtre1.time_period,
                             212,
+                            0,
                             "y")
             else:
                 plot_graphe(fig,
-                            axe,
+                            axe[:2],
                             "Filter 2",
                             filtre2.firing_rate(),
                             filtre2.time_period,
                             212,
+                            0,
                             "g")
-
-        if numero == 311:
+        max_scale = 0
+        if numero == 311:  
+            if self.fr_adjust.get() == True:
+                max_scale = max(max(filtre1.firing_rate()[0]),
+                                max(filtre2.firing_rate()[0]))
             plot_graphe(fig,
-                        axe,
+                        axe[:2],
                         "Filter 1",
                         filtre1.firing_rate(),
                         filtre1.time_period,
                         312,
+                        max_scale,
                         "y")
             plot_graphe(fig,
-                        axe,
+                        axe[:2],
                         "Filter 2",
                         filtre2.firing_rate(),
                         filtre2.time_period,
                         313,
+                        max_scale,
                         "g")
 
         return fig

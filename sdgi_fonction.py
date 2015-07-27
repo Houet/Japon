@@ -48,20 +48,24 @@ class ClicPosition():
         if self.filtre.methode != "Slope":
             self.x -= 10
 
-        if 1 in self.spike[self.x-5: self.x+5]:
-            indice = self.spike[self.x-5: self.x+5].index(1)
+        hitbox = 10
+        if 1 in self.spike[self.x-hitbox: self.x+hitbox]:
+            indice = self.spike[self.x-hitbox: self.x+hitbox].index(1)
             
-            tab_info = self.filtre.info_spike[self.x + (indice-5)]
+            tab_info = self.filtre.info_spike[self.x + (indice-hitbox)]
             self.label.destroy()
             texte = "Filter: {}\nTime: {}\nHighest val: {highest value}\n\
 Lowest value: {lowest value}".format(self.name,
                                      (tab_info["time"] + int(self.start*1000))/1000,
                                      **tab_info)
             self.label = Label(self.canvas, text=texte, relief=RIDGE, bg="white")
-            if event.x < 400:
-                self.label.place(x=event.x + 10, y=(600 - event.y) + self.offset)
-            else:
-                self.label.place(x=event.x - 170, y=(600 - event.y) + self.offset)
+            coord = [event.x + 10, (600 - event.y) + self.offset]
+            if event.x > 400:
+                coord[0] = event.x - 170
+            if event.y > 300:
+                coord[1] += 75
+                
+            self.label.place(x=coord[0], y=coord[1])
         else:
             self.label.destroy()
 
@@ -117,7 +121,7 @@ def plot(dat, axe, fig_number, filter1, filter2, mm, th1, th2,
     ax1.set_ylabel("Amplitude ($\mu$V)")
     ax1.grid(True)
     try:
-        ax1.axis([axe[0]/1000, axe[1]/1000, min(d_use)-10, max(d_use)+10])
+        ax1.axis([axe[0]/1000, axe[1]/1000, axe[2], axe[3]])
     except ValueError:
         raise FileError
     ax1.plot(x_use, d_use, "r")
@@ -158,14 +162,17 @@ def plot(dat, axe, fig_number, filter1, filter2, mm, th1, th2,
     return fig
 
 
-def plot_graphe(fig, axis, name, spike, tp, num_fig, color):
+def plot_graphe(fig, axis, name, spike, tp, num_fig, max_scale, color):
     """"""
     bx = fig.add_subplot(num_fig)
     Y, signal = spike
+    axis_top = max(Y)
+    if max_scale != 0:
+        axis_top = max_scale
     try:
         X2 = [i*tp/1000 + signal + axis[0]/1000 for i in range(len(Y))]
         bx.bar(X2, Y, color=color, width=tp/1000)
-        bx.axis([axis[0]/1000, axis[1]/1000, 0, max(Y) + 2])
+        bx.axis([axis[0]/1000, axis[1]/1000, 0, axis_top + 2])
     except ValueError:
         raise TimeperiodError(tp)
     bx.set_xlabel("Time (s)")
