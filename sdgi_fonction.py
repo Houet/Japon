@@ -4,6 +4,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from math import ceil
+from threading import Thread
 
 from tkinter import *
 
@@ -28,9 +29,31 @@ class TimeperiodError(ValueError):
     def __str__(self):
         return "{}".format(self.value)
 
+class Indicator():
+    def __init__(self, position, master):
+        self.un = Canvas(master, width=8, height=8, bg="blue")
+        self.deux = Canvas(master, width=8, height=8, bg="blue")
+        self.trois = Canvas(master, width=1, height=540, bg="blue")
+
+    def __call__(self, position, master):
+        self.trois = Canvas(master, width=1, height=540, bg="blue")
+        self.trois.place(x=position-1, y=15, in_=master)
+        self.un = Canvas(master, width=8, height=8, bg="blue")
+        self.un.place(x=position, y=15, anchor=CENTER, in_=master)
+        self.deux = Canvas(master, width=8, height=8, bg="blue")
+        self.deux.place(x=position, y=553, anchor=CENTER, in_=master)
+
+    def destroy(self):
+        self.un.destroy()
+        self.deux.destroy()
+        self.trois.destroy()
+
 
 class ClicPosition():
     def __init__(self, fig, filtre, start, canvas, offset):
+        self.ind = 0
+        self.f = fig
+        self.ax = self.f.get_children()[2]
         fig.canvas.mpl_connect("button_press_event", self)
         self.x = None
         self.name = filtre[0]
@@ -39,8 +62,54 @@ class ClicPosition():
         self.start = start
         self.canvas = canvas
         self.label = Label(self.canvas)
+        if self.spike != []:
+            if self.name == "filter 1":
+                self.label.bind_all("<Right>", self.get_next_spike)
+                self.label.bind_all("<Left>", self.get_next_spike)
+            else:
+                self.label.bind_all("<q>", self.get_next_spike)
+                self.label.bind_all("<d>", self.get_next_spike)
         self.offset = offset
-        
+        self.indicator = Canvas(self.canvas)
+        self.indicator2 = Indicator(0, self.canvas)
+        # line, = self.ax.plot([i/1000 for i in range(len(self.spike))],
+        #                self.spike,
+        #                "b")
+        # self.ax.draw_artist(line)
+
+    def get_next_spike(self, event):
+        """ return next spike ordered by time """
+        range_next = (self.ind + 1, len(self.spike), 1)
+        if event.keysym == "Left":
+            range_next = (self.ind - 1, 0, -1)
+        if event.keysym =="q":
+            range_next = (self.ind - 1, 0, -1)
+        for i in range(range_next[0], range_next[1], range_next[2]):
+            if self.spike[i] == 1:
+                self.ind = i
+                
+                self.indicator2.destroy()
+                # self.indicator = Canvas(self.canvas, width=8, height=8, bg="blue")
+                # self.indicator.place(x=(self.ind*700)/len(self.spike) + 81,
+                #                      y=15,
+                #                      anchor=CENTER,
+                #                      in_= self.canvas)
+                self.indicator2((self.ind*700)/len(self.spike) + 81, self.canvas)
+
+                tab_info = self.filtre.info_spike[self.ind]
+                self.label.destroy()
+                texte = "Filter: {}\nTime: {}\nHighest val: {highest value}\n\
+Lowest value: {lowest value}".format(self.name,
+                                     (tab_info["time"] + int(self.start*1000))/1000,
+                                     **tab_info)
+                self.label = Label(self.canvas, text=texte, relief=RIDGE, bg="white")
+                coord = [(self.ind*700)/len(self.spike) + 90, 300]
+                if coord[0] > 400:
+                    coord[0] -= 180
+                self.label.place(x=coord[0], y=coord[1])
+                break
+        return
+ 
     def __call__(self, event):
         if not event.inaxes:
             return
@@ -50,9 +119,16 @@ class ClicPosition():
 
         hitbox = 10
         if 1 in self.spike[self.x-hitbox: self.x+hitbox]:
-            indice = self.spike[self.x-hitbox: self.x+hitbox].index(1)
-            
-            tab_info = self.filtre.info_spike[self.x + (indice-hitbox)]
+            self.indice = self.spike[self.x-hitbox: self.x+hitbox].index(1)
+            self.ind = self.x + (self.indice-hitbox)
+
+            self.indicator.destroy()
+            self.indicator = Canvas(self.canvas, width=8, height=8, bg="blue")
+            self.indicator.place(x=(self.ind*700)/1000 + 81,
+                                 y=15,
+                                 anchor=CENTER)
+
+            tab_info = self.filtre.info_spike[self.x + (self.indice-hitbox)]
             self.label.destroy()
             texte = "Filter: {}\nTime: {}\nHighest val: {highest value}\n\
 Lowest value: {lowest value}".format(self.name,
@@ -68,6 +144,7 @@ Lowest value: {lowest value}".format(self.name,
             self.label.place(x=coord[0], y=coord[1])
         else:
             self.label.destroy()
+            self.indicator.destroy()
 
 
 def load_file(fname):
@@ -156,8 +233,6 @@ def plot(dat, axe, fig_number, filter1, filter2, mm, th1, th2,
 
     if mov.get():
         ax1.plot(x_use[10:-11], mm, "b", ls="--")
-
-
 
     return fig
 
