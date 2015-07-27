@@ -307,11 +307,18 @@ class Sdgi(Frame):
         ########################################################################
         
         self.menubar = Menu(self)
-        self.menubar.add_command(label="Open",
-                                 command=self.open)
+        self.sousmenu = Menu(self.menubar, tearoff=0)
+        self.sousmenu.add_command(label="File",
+                                 command=self.open,
+                                 accelerator="Ctrl + O")
+        self.sousmenu.add_command(label="Stream",
+                                  command=self.open_stream,
+                                  accelerator="Ctrl + S")
+        self.menubar.add_cascade(label="Open", menu=self.sousmenu)
         self.menubar.add_command(label="Help", command=self.help)
         self.window.config(menu=self.menubar)
         self.menubar.bind_all("<Control-o>", self.open)
+        self.menubar.bind_all("<Control-s>", self.open_stream)
 
         ########################################################################
         ####################       frame for drawing        ####################
@@ -503,6 +510,10 @@ class Sdgi(Frame):
             self.amplitude["end"].set(max(self.data) + 10)
             self.refresh()
         return
+
+    def open_stream(self, *args):
+        """ open a stream """
+        pass
 
     def help(self):
         """ return https://github.com/Houet/Japon """
