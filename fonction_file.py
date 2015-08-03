@@ -10,6 +10,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 import numpy as np
+from math import fabs
 
 from fonction_base import *
 
@@ -126,16 +127,19 @@ class ClicPosition(object):
             self.x -= 10
 
         hitbox = 10
-        if 1 in self.spike[self.x-hitbox: self.x+hitbox]:
-            self.indice = self.spike[self.x-hitbox: self.x+hitbox].index(1)
-            self.ind = self.x + (self.indice-hitbox)
+        for i in range(hitbox):
+            if 1 in self.spike[self.x-i: self.x+i]:
+                self.indice = self.spike[self.x-i: self.x+i].index(1)
+                
+                self.ind = self.x + (self.indice - i)
+                self.indicator(self.ind/self.time_sample + self.start)
+                break
 
-            self.indicator(self.ind/self.time_sample + self.start)
-        else:
-            try:
-                del self.ax.lines[-1]
-            except IndexError:
-                pass
+        # else:
+        #     try:
+        #         del self.ax.lines[-1]
+        #     except IndexError:
+        #         pass
 
 
 def plot(dat, axe, time_sample, fig_number, filter1, filter2, mm, th1, th2,

@@ -80,8 +80,7 @@ class Sdgi(Frame):
         self.menubar.add_cascade(label="Open", menu=self.sousmenu)
 
         self.menubar.add_command(label="Stream",
-                                 command=self.open_stream,
-                                 accelerator="Ctrl + S")
+                                 command=self.open_stream)
         
         self.menubar.add_command(label="Help", command=self.help)
         self.window.config(menu=self.menubar)
@@ -301,7 +300,7 @@ class Sdgi(Frame):
             simple = Thread(target=ma_fonction,
                             args=(filtre_stream.ret,
                                   filtre_stream.name.get(),
-                                  self.time_sample,
+                                  filtre_stream.sampling.get(),
                                   wind))
             simple.start()
             wind.mainloop()

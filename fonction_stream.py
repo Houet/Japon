@@ -23,6 +23,7 @@ class Choose(Frame):
         self.pack()
         self.master = master
         self.name = StringVar(self, None)
+        self.sampling = DoubleVar(self, 0.001)
         self.short_name = StringVar(self, "Search")
         self.filtre = {"method": StringVar(self, "Slope"),
                        "threshold": IntVar(self, 40),
@@ -31,7 +32,7 @@ class Choose(Frame):
                        }
         self.ret = None
 
-        f = SettingFiltre(self, self.filtre)
+        f = SettingFiltre(self, self.filtre, text="Set filter: ")
         f.grid(column=1, columnspan=2, row=1)
         Label(self, text="Stream:").grid(column=1, row=2, sticky=W)
         Button(self,
@@ -40,6 +41,8 @@ class Choose(Frame):
                command=self.search,
                relief=SUNKEN,
                bg="white").grid(column=2, row=2, sticky=E)
+        Label(self, text="Sampling Rate:").grid(column=1, row=3, sticky=W)
+        Entry(self, textvariable=self.sampling, width=5, justify="right").grid(column=2, row=3, sticky=E)
         Button(self,
                text="Ok",
                width=8,
@@ -63,11 +66,12 @@ class Choose(Frame):
         self.master.destroy()
 
 
-def ma_fonction(filtre, data, time_sample, grand_master):
+def ma_fonction(filtre, data, sampling, grand_master):
     if data == "":
         return
     with open(data, "r") as f:
         header = f.readline()
+        sampling = 1 / sampling
         fig = Figure(tight_layout=False)
         ax = fig.add_subplot(211)
         ax2 = fig.add_subplot(212)
@@ -91,18 +95,20 @@ def ma_fonction(filtre, data, time_sample, grand_master):
                 x0, y0 = line.split(",")
                 x.append(float(x0))
                 y.append(float(y0))
-                time.sleep(0.001)
-                if i % filtre.time_period == 0:
+
+                if i != 0 and i % filtre.time_period == 0:
                     filtre.get_spike(y[i - filtre.time_period:i])
-                    ax2.bar((i - filtre.time_period)/time_sample,
+                    ax2.set_xlim(0, i/sampling)
+                    ax2.bar((i - filtre.time_period)/sampling,
                             filtre.tab_spikes.count(1),
                             color="green",
-                            width=filtre.time_period/time_sample)
+                            width=filtre.time_period/sampling)
+                    ax2.grid(True)
 
-                if i % fen_size == 0:
+                if i != 0 and i % fen_size == 0:
+                    ax.axis([(i-10*fen_size)/sampling,
+                            (i+2*fen_size)/sampling, -200, 200])
                     ax.plot(x[-fen_size-1:], y[-fen_size-1:], "b")
-                    ax.axis([(i-10*fen_size)/time_sample,
-                            (i+2*fen_size)/time_sample, -200, 200])
                     sp = [i*500 - 230 for i
                           in filtre.get_spike(y[-fen_size-1:])]
                     ax.plot(x[-fen_size-1:], sp, "r")
@@ -113,9 +119,8 @@ def ma_fonction(filtre, data, time_sample, grand_master):
                     if filtre.methode != "Slope" and filtre.time_period <= 10:
                         signal = 0.01
 
-                    ax2.set_xlim(0, i/time_sample)
-                    ax2.grid(True)
                     canvas.draw()
+                # time.sleep(0.001)
                 i += 1
         except RuntimeError:
             pass
