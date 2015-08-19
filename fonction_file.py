@@ -217,7 +217,7 @@ def plot(dat, axe, time_sample, fig_number, filter1, filter2, mm, th1, th2,
         raise FilterError("Filter 2")
 
     if mov.get():
-        ax1.plot(x_use[10:-11], mm, "b", ls="--")
+        ax1.plot(x_use[10:-11], mm, "b")
 
     return fig
 
