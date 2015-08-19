@@ -51,6 +51,7 @@ class ClicPosition(object):
         self.support = support_fig
         self.ax = self.f.get_children()[2]
         self.ax = self.ax.twinx()
+        self.ax.yaxis.set_visible(False)
         fig.canvas.mpl_connect("button_press_event", self)
         self.x = None
         self.name = filtre[0]
