@@ -318,6 +318,10 @@ class Sdgi(Frame):
 
     def refresh(self):
         """ """
+        for widget in self.window.winfo_children():
+            if isinstance(widget, Toplevel):
+                widget.destroy()
+
         for w in self.plotframe.winfo_children():
             w.destroy()
 
