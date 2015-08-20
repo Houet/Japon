@@ -249,7 +249,7 @@ class Sdgi(Frame):
                width=15).grid(column=2, row=1)
         Button(self.buttonframe,
                text="Quit",
-               command=self.quit,
+               command=self.window.destroy,
                width=15).grid(column=2, row=2)
 
         for child in self.buttonframe.winfo_children():
@@ -371,19 +371,6 @@ class Sdgi(Frame):
             canvas.show()
             canvas.get_tk_widget().pack()
 
-            if self.occur.get():
-                wind = Toplevel(self.window)
-                wind.geometry("+300+100")
-                wind.focus()
-                oc = Frame(wind)
-                oc.pack(side=LEFT)
-                occurence(filtre1, oc)
-                ft = Frame(wind)
-                ft.pack(side=LEFT)
-                fourier(len(self.data), 1.0 / self.time_sample, self.data, ft)
-                wind.mainloop()
-
-
             self.cl1 = ClicPosition(self,
                         self.fig,
                         canvas,
@@ -400,6 +387,18 @@ class Sdgi(Frame):
                         self.time["start"].get(),
                         self.time_sample,
                         self.plotframe)
+
+            if self.occur.get():
+                wind = Toplevel(self.window)
+                wind.geometry("+300+100")
+                wind.focus()
+                oc = Frame(wind)
+                oc.pack(side=LEFT)
+                occurence(filtre1, oc)
+                ft = Frame(wind)
+                ft.pack(side=LEFT)
+                fourier(len(self.data), 1.0 / self.time_sample, self.data, ft)
+                wind.mainloop()
 
         return
 
