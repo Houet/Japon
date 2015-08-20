@@ -4,6 +4,7 @@
 """ fonction pour gerer les stream """
 
 import time
+import sys
 
 from tkinter import *
 from tkinter.filedialog import askopenfilename
@@ -14,8 +15,6 @@ from matplotlib.figure import Figure
 
 from fonction_base import *
 from fonction_file import plot_graphe
-
-import sys
 
 
 class Choose(Frame):

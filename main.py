@@ -10,8 +10,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 from webbrowser import open as wbopen
-# from threading import Thread
-import multiprocessing
 from multiprocessing import Process, Pipe
 
 from fonction_base import *
