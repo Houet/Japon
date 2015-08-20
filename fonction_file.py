@@ -27,6 +27,8 @@ class InfoSpike(LabelFrame):
               anchor=E).grid(column=2, row=1, sticky=E)
         Label(self, text="Sp. detected:").grid(column=1, row=2, sticky=W)
         Label(self,
+              width=7,
+              anchor=E,
               textvariable=info["nb_spike"]).grid(column=2, row=2, sticky=E)
         Label(self, text="Spike time:").grid(column=1, row=3, sticky=W)
         Label(self,
