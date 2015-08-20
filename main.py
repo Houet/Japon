@@ -10,7 +10,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 from webbrowser import open as wbopen
-from threading import Thread
+# from threading import Thread
+import multiprocessing
+from multiprocessing import Process, Pipe
 
 from fonction_base import *
 from fonction_file import *
@@ -19,10 +21,12 @@ from fonction_stream import *
 
 class Sdgi(Frame):
     """ Spike Detection Graphic Interface """
-    def __init__(self, window, **kwargs):
+    def __init__(self, window, pipe_entry, **kwargs):
         Frame.__init__(self, window, **kwargs)
         self.pack(fill=BOTH)
         self.window = window
+
+        self.communication = pipe_entry
         
         self.fname = StringVar(self, None)
         self.fshortname = StringVar(self, None)
@@ -294,16 +298,11 @@ class Sdgi(Frame):
         wind_info.mainloop()
 
         if not filtre_stream.name.get() in ["Search", None, ""]:
-            wind = Toplevel(self.window)
-            wind.geometry("+300+100")
-            wind.focus()
-            simple = Thread(target=ma_fonction,
-                            args=(filtre_stream.ret,
-                                  filtre_stream.name.get(),
-                                  filtre_stream.sampling.get(),
-                                  wind))
-            simple.start()
-            wind.mainloop()
+            self.communication.send([1,
+                                     filtre_stream.ret,
+                                     filtre_stream.name.get(),
+                                     filtre_stream.sampling.get()])
+
         return
 
     def help(self):
@@ -503,7 +502,12 @@ class Sdgi(Frame):
 
 
 if __name__ == "__main__":
+    ruler, slave = Pipe()
+    sentinelle = Process(target=stream_handler, args=(slave,))
+    sentinelle.start() 
+
     root = Tk()
     root.title("Spike Detection Graphical Interface")
-    fenetre = Sdgi(root)
+    fenetre = Sdgi(root, ruler)
     root.mainloop()
+    sentinelle.terminate()

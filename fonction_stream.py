@@ -15,6 +15,8 @@ from matplotlib.figure import Figure
 from fonction_base import *
 from fonction_file import plot_graphe
 
+import sys
+
 
 class Choose(Frame):
     """ choose your filtre for stream """
@@ -66,7 +68,7 @@ class Choose(Frame):
         self.master.destroy()
 
 
-def ma_fonction(filtre, data, sampling, grand_master):
+def ma_fonction(grand_master, filtre, data, sampling):
     if data == "":
         return
     with open(data, "r") as f:
@@ -124,4 +126,24 @@ def ma_fonction(filtre, data, sampling, grand_master):
                 i += 1
         except RuntimeError:
             pass
+    return
+
+
+def stream_handler(pipe_entry):
+    """ fonction which is supposed to handle the stream """
+    flag = False
+    while not flag:
+        try:
+            signal = pipe_entry.recv()
+            if signal[0] == 1:
+                flag = True
+        except RuntimeError:
+            pass
+        except KeyboardInterrupt:
+            sys.exit(0)
+
+    root = Tk()
+    root.title("Stream")
+    ma_fonction(root, *signal[1:])
+    root.mainloop()
     return
