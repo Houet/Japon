@@ -146,6 +146,7 @@ class ClicPosition(object):
 
 
 def plot(dat, axe, time_sample, fig_number, filter1, filter2, mm, th1, th2,
+         unitx, unity,
          f1=False, f2=False, mov=False,
          mov_up_1=False, mov_down_1=False, mov_up_2=False, mov_down_2=False):
     """
@@ -178,8 +179,8 @@ def plot(dat, axe, time_sample, fig_number, filter1, filter2, mm, th1, th2,
     mm_down_2 = [i - th2 for i in mm]
 
     ax1 = fig.add_subplot(fig_number)
-    ax1.set_xlabel("Time (s)")
-    ax1.set_ylabel("Amplitude ($\mu$V)")
+    ax1.set_xlabel("Time ({})".format(unitx))
+    ax1.set_ylabel("Amplitude ({})".format(unity))
     ax1.grid(True)
     try:
         ax1.axis([axe[0] / time_sample,
@@ -224,7 +225,8 @@ def plot(dat, axe, time_sample, fig_number, filter1, filter2, mm, th1, th2,
     return fig
 
 
-def plot_graphe(fig, axis, name, spike, tp, num_fig, max_scale, time_sample, color):
+def plot_graphe(fig, axis, name, spike, tp, num_fig, max_scale,
+                time_sample, color, unitx):
     """"""
     bx = fig.add_subplot(num_fig)
     Y, signal = spike
@@ -238,7 +240,7 @@ def plot_graphe(fig, axis, name, spike, tp, num_fig, max_scale, time_sample, col
         bx.axis([axis[0]/time_sample, axis[1]/time_sample, 0, axis_top + 2])
     except ValueError:
         raise TimeperiodError(tp)
-    bx.set_xlabel("Time (s)")
+    bx.set_xlabel("Time ({})".format(unitx))
     bx.set_ylabel("{}\nFiring rate".format(name))
     bx.grid(True)
     return fig
@@ -253,7 +255,7 @@ def occurence(filtre, master):
     mag = [fr.count(i) for i in range(1, max(fr) + 1)]
     frq = [i for i in range(1, max(fr) + 1)]
     ax.bar(frq, mag, align="center", color="yellow")
-    ax.set_xlabel("Number spike/period ({}ms)".format(filtre.time_period))
+    ax.set_xlabel("Number spike/period ({} points)".format(filtre.time_period))
     ax.set_ylabel("Number of occurence")
     ax.axis([0.5, max(fr) + 0.5, 0, max(mag) + 2])
 

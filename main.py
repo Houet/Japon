@@ -30,6 +30,9 @@ class Sdgi(Frame):
         self.fshortname = StringVar(self, None)
         self.flenght = IntVar(self, None)
 
+        self.unitx = StringVar(self, "S")
+        self.unity = StringVar(self, chr(956) + "V")
+
         self.time = {
                     "start": DoubleVar(self, 0),
                     "end": DoubleVar(self, 0),
@@ -83,6 +86,25 @@ class Sdgi(Frame):
 
         self.menubar.add_command(label="Stream",
                                  command=self.open_stream)
+
+        self.menu_setting = Menu(self.menubar, tearoff=0)
+        self.menu_time = Menu(self.menu_setting, tearoff=0)
+        self.menu_time.add_radiobutton(label=(chr(956) + "S"),
+                                       variable=self.unitx)
+        self.menu_time.add_radiobutton(label="mS", variable=self.unitx)
+        self.menu_time.add_radiobutton(label="S", variable=self.unitx)
+        
+        self.menu_ampl = Menu(self.menu_setting, tearoff=0)
+        self.menu_ampl.add_radiobutton(label=(chr(956) + "V"),
+                                       variable=self.unity)
+        self.menu_ampl.add_radiobutton(label="mV", variable=self.unity)
+        self.menu_ampl.add_radiobutton(label="V", variable=self.unity)
+
+        self.menu_setting.add_cascade(label="Time",
+                                      menu=self.menu_time)
+        self.menu_setting.add_cascade(label="Amplitude",
+                                      menu=self.menu_ampl)
+        self.menubar.add_cascade(label="Settings", menu=self.menu_setting)
         
         self.menubar.add_command(label="Help", command=self.help)
         self.window.config(menu=self.menubar)
@@ -447,6 +469,8 @@ class Sdgi(Frame):
                    filtre1.moving_average,
                    self.filter1["threshold"].get(),
                    self.filter2["threshold"].get(),
+                   self.unitx.get(),
+                   self.unity.get(),
                    **self.options)
 
         self.spike_detected["filter1_nb"].set(filtre1.number_spikes)
@@ -461,7 +485,8 @@ class Sdgi(Frame):
                             212,
                             0,
                             self.time_sample,
-                            "y")
+                            "y",
+                            self.unitx.get())
             else:
                 plot_graphe(fig,
                             axe[:2],
@@ -471,7 +496,8 @@ class Sdgi(Frame):
                             212,
                             0,
                             self.time_sample,
-                            "g")
+                            "g",
+                            self.unitx.get())
         max_scale = 0
         if numero == 311:  
             if self.fr_adjust.get() == True:
@@ -485,7 +511,8 @@ class Sdgi(Frame):
                         312,
                         max_scale,
                         self.time_sample,
-                        "y")
+                        "y",
+                        self.unitx.get())
             plot_graphe(fig,
                         axe[:2],
                         "Filter 2",
@@ -494,7 +521,8 @@ class Sdgi(Frame):
                         313,
                         max_scale,
                         self.time_sample,
-                        "g")
+                        "g",
+                        self.unitx.get())
 
         return fig
 
