@@ -6,7 +6,7 @@
 
 from tkinter import *
 import matplotlib
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 
 import numpy as np
@@ -249,7 +249,7 @@ def plot_graphe(fig, axis, name, spike, tp, num_fig, max_scale,
 def occurence(filtre, master):
     """ return the number of occurence number spike/period """
 
-    fig = Figure(figsize=(5, 3), tight_layout=True)
+    fig = Figure(figsize=(6, 4), tight_layout=True)
     ax = fig.add_subplot(111)
     fr = filtre.firing_rate()[0]
     mag = [fr.count(i) for i in range(1, max(fr) + 1)]
@@ -274,7 +274,7 @@ def fourier(N, T, y, master):
     y = data
     fig = fig to plot on
     """
-    fig = Figure(figsize=(5, 3), tight_layout=True)
+    fig = Figure(figsize=(6, 4), tight_layout=True)
     x = np.linspace(0.0, N*T, N)
     yf = np.fft.fft(y)
     xf = np.linspace(0.0, 1.0/(2.0*T), N/2)
@@ -285,4 +285,8 @@ def fourier(N, T, y, master):
     canvas = FigureCanvasTkAgg(fig, master=master)
     canvas.show()
     canvas.get_tk_widget().pack()
+
+    toolbar = NavigationToolbar2TkAgg(canvas, master)
+    toolbar.update()
+    canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=1)
     return
