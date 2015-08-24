@@ -272,5 +272,9 @@ def load_file(fname):
     with open(fname, "r") as f:
         data = [line.split(",") for line in f]
         header = data.pop(0)
-        time_sample = float(data[1][0]) - float(data[0][0])
+        try:
+            time_sample = float(data[1][0]) - float(data[0][0])
+        except IndexError:
+            raise FileError
+
     return header, [float(i[1]) for i in data], time_sample

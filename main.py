@@ -299,6 +299,10 @@ class Sdgi(Frame):
             self.time_sample = 1 / self.time_sample
         except FileNotFoundError:
             pass
+        except FileError:
+            showwarning(title="Error",
+                        message="Can't read file {}!".format(self.fname.get()),
+                        parent=self.window)
         else:
             self.fshortname.set(self.fname.get().split("/")[-1])
             self.flenght.set(len(self.data) / self.time_sample)
