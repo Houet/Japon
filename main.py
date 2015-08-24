@@ -10,7 +10,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 from webbrowser import open as wbopen
-from multiprocessing import Process, Pipe
+from multiprocessing import Process, Pipe, Queue
+from threading import Thread
 
 from fonction_base import *
 from fonction_file import *
@@ -534,6 +535,7 @@ if __name__ == "__main__":
 
     root = Tk()
     root.title("Spike Detection Graphical Interface")
+    
     fenetre = Sdgi(root, ruler)
     root.mainloop()
     sentinelle.terminate()

@@ -141,8 +141,7 @@ def stream_handler(pipe_entry):
         except KeyboardInterrupt:
             sys.exit(0)
 
-    root = Tk()
-    root.title("Stream")
+    root = Tk(screenName="Stream")
     ma_fonction(root, *signal[1:])
     root.mainloop()
     return
