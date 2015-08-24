@@ -154,6 +154,12 @@ def plot(dat, axe, time_sample, fig_number, filter1, filter2, mm, th1, th2,
     fig = figure sur laquelle tracer
     """
 
+    if unitx != "S" and unitx != "mS":
+        unitx = "$\mu$S"
+
+    if unity != "V" and unity != "mV":
+        unity = "$\mu$V"
+
     fig = Figure(figsize=(8, 6),
                  dpi=100,
                  tight_layout=True,
@@ -228,6 +234,9 @@ def plot(dat, axe, time_sample, fig_number, filter1, filter2, mm, th1, th2,
 def plot_graphe(fig, axis, name, spike, tp, num_fig, max_scale,
                 time_sample, color, unitx):
     """"""
+    if unitx != "S" and unitx != "mS":
+        unitx = "$\mu$S"
+
     bx = fig.add_subplot(num_fig)
     Y, signal = spike
     axis_top = max(Y)

@@ -319,10 +319,17 @@ class Sdgi(Frame):
         wind_info.mainloop()
 
         if not filtre_stream.name.get() in ["Search", None, ""]:
-            self.communication.send([1,
-                                     filtre_stream.ret,
-                                     filtre_stream.name.get(),
-                                     filtre_stream.sampling.get()])
+            wind = Toplevel(self.window)
+            wind.geometry("+300+100")
+            wind.focus()
+            wind.title("Stream")
+            simple = Thread(target=ma_fonction,
+                           args=(wind,
+                                 filtre_stream.ret,
+                                 filtre_stream.name.get(),
+                                 filtre_stream.sampling.get()))
+            simple.start()
+            wind.mainloop()
 
         return
 
@@ -339,7 +346,7 @@ class Sdgi(Frame):
     def refresh(self):
         """ """
         for widget in self.window.winfo_children():
-            if isinstance(widget, Toplevel):
+            if isinstance(widget, Toplevel) and widget.title() != "Stream":
                 widget.destroy()
 
         for w in self.plotframe.winfo_children():
@@ -529,13 +536,10 @@ class Sdgi(Frame):
 
 
 if __name__ == "__main__":
-    ruler, slave = Pipe()
-    sentinelle = Process(target=stream_handler, args=(slave,))
-    sentinelle.start() 
+    ruler, slave = Pipe() 
 
     root = Tk()
     root.title("Spike Detection Graphical Interface")
     
     fenetre = Sdgi(root, ruler)
     root.mainloop()
-    sentinelle.terminate()
