@@ -258,7 +258,7 @@ def plot_graphe(fig, axis, name, spike, tp, num_fig, max_scale,
 def occurence(filtre, master):
     """ return the number of occurence number spike/period """
 
-    fig = Figure(figsize=(6, 4), tight_layout=True)
+    fig = Figure(figsize=(6, 4), tight_layout=True, dpi=90)
     ax = fig.add_subplot(111)
     fr = filtre.firing_rate()[0]
     mag = [fr.count(i) for i in range(1, max(fr) + 1)]
