@@ -65,9 +65,10 @@ class Filtre(object):
         return
         the moving average of data
         """
+        self.moving_average = []
         debut = sum(data[:20]) / 20
-        for i in range(10, len(data) - 11):
-            debut += (data[i + 10 + 1] - data[i - 10 + 1]) / 20
+        for i in range(10, len(data) - 10):
+            debut += (data[i + 10] - data[i - 10]) / 20
             self.moving_average.append(debut)
         return
 
@@ -83,6 +84,7 @@ class Filtre(object):
     def get_spike_upper(self, data):
         """ get spike with upper method """
         pas = (len(data) - len(self.moving_average)) // 2
+        print("data: {}, ma: {}, pas: {}".format(len(data), len(self.moving_average), pas))
         tab = [0 for i in range(len(self.moving_average))]
         for i in range(1, len(self.moving_average)):
             if data[i + pas] > self.moving_average[i] + self.threshold:
@@ -153,7 +155,7 @@ class Filtre(object):
         # rattraper cela, et vaut donc 0 quand la methode est slope
         offset = 0
         if self.methode != "Slope":
-            data = data[10: -11]
+            data = data[10: -10]
             offset = 10
         tab = []
         for i in range(len(self.tab_spikes)):

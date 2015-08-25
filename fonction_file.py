@@ -169,12 +169,12 @@ def plot(dat, axe, time_sample, fig_number, filter1, filter2, mm, th1, th2,
     x_use = X[axe[0]:axe[1]]
 
     if len(filter1) != len(x_use):
-        x_use_1 = x_use[10:-11]
+        x_use_1 = x_use[10:-10]
     else:
         x_use_1 = x_use
 
     if len(filter2) != len(x_use):
-        x_use_2 = x_use[10:-11]
+        x_use_2 = x_use[10:-10]
     else:
         x_use_2 = x_use
 
@@ -206,10 +206,10 @@ def plot(dat, axe, time_sample, fig_number, filter1, filter2, mm, th1, th2,
             ax2.plot(x_use_1, filter1, "y")
 
         if mov_up_1.get():
-            ax1.plot(x_use[10:-11], mm_up_1, "b")
+            ax1.plot(x_use[10:-10], mm_up_1, "b")
 
         if mov_down_1.get():
-            ax1.plot(x_use[10:-11], mm_down_1, "b")
+            ax1.plot(x_use[10:-10], mm_down_1, "b")
     except ValueError:
         raise FilterError("Filter 1")
 
@@ -218,15 +218,15 @@ def plot(dat, axe, time_sample, fig_number, filter1, filter2, mm, th1, th2,
             ax2.plot(x_use_2, filter2, "g")
 
         if mov_up_2.get():
-            ax1.plot(x_use[10:-11], mm_up_2, "k")
+            ax1.plot(x_use[10:-10], mm_up_2, "k")
 
         if mov_down_2.get():
-            ax1.plot(x_use[10:-11], mm_down_2, "k")
+            ax1.plot(x_use[10:-10], mm_down_2, "k")
     except ValueError:
         raise FilterError("Filter 2")
 
     if mov.get():
-        ax1.plot(x_use[10:-11], mm, "b")
+        ax1.plot(x_use[10:-10], mm, "b")
 
     return fig
 
