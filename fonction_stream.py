@@ -25,6 +25,8 @@ class Choose(Frame):
         self.master = master
         self.name = StringVar(self, None)
         self.sampling = DoubleVar(self, 0.001)
+        self.unitx = StringVar(self, "S")
+        self.unity = StringVar(self, chr(956) + "V")
         self.short_name = StringVar(self, "Search")
         self.filtre = {"method": StringVar(self, "Slope"),
                        "threshold": IntVar(self, 40),
@@ -34,23 +36,51 @@ class Choose(Frame):
         self.ret = None
 
         f = SettingFiltre(self, self.filtre, text="Set filter: ")
-        f.grid(column=1, columnspan=2, row=1)
-        Label(self, text="Stream:").grid(column=1, row=2, sticky=W)
+        f.grid(column=3, columnspan=2, row=1, rowspan=4)
+        
+        Label(self, text="Stream:").grid(column=1, row=1, sticky=W)
         Button(self,
                textvariable=self.short_name,
                width=9,
                command=self.search,
                relief=SUNKEN,
-               bg="white").grid(column=2, row=2, sticky=E)
-        Label(self, text="Sampling Rate:").grid(column=1, row=3, sticky=W)
-        Entry(self, textvariable=self.sampling, width=5, justify="right").grid(column=2, row=3, sticky=E)
+               bg="white").grid(column=2, row=1, sticky=E, padx=5)
+        Label(self, text="Sampling Rate:").grid(column=1, row=2, sticky=W)
+        Entry(self, textvariable=self.sampling, width=9, justify="right").grid(column=2, row=2, padx=5)
+
+        Label(self, text="Time:").grid(column=1, row=3, sticky=W)
+        self.menu_unitx = Menubutton(self,
+                                     width=9,
+                                     textvariable=self.unitx,
+                                     relief=RAISED)
+        self.menu_time = Menu(self.menu_unitx, tearoff=0)
+        self.menu_time.add_radiobutton(label=(chr(956) + "S"),
+                                       variable=self.unitx)
+        self.menu_time.add_radiobutton(label="mS", variable=self.unitx)
+        self.menu_time.add_radiobutton(label="S", variable=self.unitx)
+        self.menu_unitx["menu"] = self.menu_time
+        self.menu_unitx.grid(column=2, row=3)
+        
+        Label(self, text="Amplitude:").grid(column=1, row=4, sticky=W)
+        self.menu_unity = Menubutton(self,
+                                     width=9,
+                                     textvariable=self.unity,
+                                     relief=RAISED)
+        self.menu_ampl = Menu(self.menu_unity, tearoff=0)
+        self.menu_ampl.add_radiobutton(label=(chr(956) + "V"),
+                                       variable=self.unity)
+        self.menu_ampl.add_radiobutton(label="mV", variable=self.unity)
+        self.menu_ampl.add_radiobutton(label="V", variable=self.unity)
+        self.menu_unity["menu"] = self.menu_ampl
+        self.menu_unity.grid(column=2, row=4)
+
         Button(self,
                text="Ok",
                width=8,
-               command=self.__call__).grid(column=1, columnspan=2, row=4)
+               command=self.__call__).grid(column=2, columnspan=2, row=5, pady=3)
 
-        for child in self.winfo_children():
-            child.grid_configure(pady=3)
+        # for child in self.winfo_children():
+        #     child.grid_configure(pady=3)
 
     def search(self):
         self.name.set(askopenfilename(filetypes=[("text file", ".txt")],
@@ -63,11 +93,19 @@ class Choose(Frame):
                           self.filtre["threshold"].get(),
                           self.filtre["time_period"].get(),
                           self.filtre["step"].get())
+
+        self.unitx = self.unitx.get()
+        self.unity = self.unity.get()
+        if self.unitx != "S" and self.unitx != "mS":
+            self.unitx = "$\mu$S"
+        if self.unity != "V" and self.unity != "mV":
+            self.unity = "$\mu$V"
+
         self.quit()
         self.master.destroy()
 
 
-def ma_fonction(grand_master, filtre, data, sampling):
+def ma_fonction(grand_master, filtre, data, sampling, unitx, unity):
     if data == "":
         return
     with open(data, "r") as f:
@@ -76,9 +114,9 @@ def ma_fonction(grand_master, filtre, data, sampling):
         fig = Figure(tight_layout=False)
         ax = fig.add_subplot(211)
         ax2 = fig.add_subplot(212)
-        ax.set_xlabel("Time (s)")
-        ax.set_ylabel("Amplitude ($\mu$V)")
-        ax2.set_xlabel("Time (s)")
+        ax.set_xlabel("Time ({})".format(unitx))
+        ax.set_ylabel("Amplitude ({})".format(unity))
+        ax2.set_xlabel("Time ({})".format(unitx))
         ax2.set_ylabel("Firing rate")
         ax.grid(True)
         master = Frame(grand_master)

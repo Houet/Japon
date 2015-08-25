@@ -331,7 +331,9 @@ class Sdgi(Frame):
                            args=(wind,
                                  filtre_stream.ret,
                                  filtre_stream.name.get(),
-                                 filtre_stream.sampling.get()))
+                                 filtre_stream.sampling.get(),
+                                 filtre_stream.unitx,
+                                 filtre_stream.unity))
             simple.start()
             wind.mainloop()
 
