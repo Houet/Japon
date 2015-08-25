@@ -84,7 +84,7 @@ class Filtre(object):
     def get_spike_upper(self, data):
         """ get spike with upper method """
         pas = (len(data) - len(self.moving_average)) // 2
-        print("data: {}, ma: {}, pas: {}".format(len(data), len(self.moving_average), pas))
+        # print("data: {}, ma: {}, pas: {}".format(len(data), len(self.moving_average), pas))
         tab = [0 for i in range(len(self.moving_average))]
         for i in range(1, len(self.moving_average)):
             if data[i + pas] > self.moving_average[i] + self.threshold:

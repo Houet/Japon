@@ -109,10 +109,13 @@ def ma_fonction(grand_master, filtre, data, sampling):
                 if i != 0 and i % fen_size == 0:
                     ax.axis([(i-10*fen_size)/sampling,
                             (i+2*fen_size)/sampling, -200, 200])
-                    ax.plot(x[-fen_size-1:], y[-fen_size-1:], "b")
+                    ax.plot(x[-fen_size:], y[-fen_size:], "b")
                     sp = [i*500 - 230 for i
-                          in filtre.get_spike(y[-fen_size-1:])]
-                    ax.plot(x[-fen_size-1:], sp, "r")
+                          in filtre.get_spike(y[-fen_size:])]
+                    if filtre.methode != "Slope":
+                        ax.plot(x[-fen_size+10:-10], sp, "r")
+                    else:
+                        ax.plot(x[-fen_size:], sp, "r")
 
                     spike_detected += filtre.number_spikes
 
